@@ -14,7 +14,9 @@
             "com.example.hellomod.HelloMod"
         ]
     },
-    "mixins": [],
+    "mixins": [
+        "hello-mod.mixins.json"
+    ],
     "depends": {
         "fabricloader": ">=0.15.0",
         "minecraft": "~1.20.4",
