@@ -1,0 +1,24 @@
+{
+    "schemaVersion": 1,
+    "id": "hello-mod",
+    "version": "${version}",
+    "name": "Hello Mod",
+    "description": "A simple mod that says hello when you join a world.",
+    "authors": ["You"],
+    "contact": {},
+    "license": "MIT",
+    "icon": "assets/hello-mod/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "com.example.hellomod.HelloMod"
+        ]
+    },
+    "mixins": [],
+    "depends": {
+        "fabricloader": ">=0.15.0",
+        "minecraft": "~1.20.4",
+        "java": ">=17",
+        "fabric-api": "*"
+    }
+}
