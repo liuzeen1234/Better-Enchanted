@@ -12,7 +12,9 @@
         "PotionItemMixin",
         "PotionEntityMixin"
     ],
-    "client": [],
+    "client": [
+        "client.DrawContextCooldownMixin"
+    ],
     "injectors": {
         "defaultRequire": 1
     }

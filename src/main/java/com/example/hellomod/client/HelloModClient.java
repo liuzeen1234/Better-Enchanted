@@ -33,6 +33,9 @@ public class HelloModClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // 注册无限附魔冷却客户端同步
+        InfinityCooldownClientState.register();
+
         // 注册按键绑定: 切换实体血量显示（默认无绑定）
         toggleHealthHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.hello-mod.toggle_health_hud", // 翻译键

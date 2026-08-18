@@ -2,6 +2,7 @@ package com.example.hellomod;
 
 import com.example.hellomod.block.HelloModBlockEntities;
 import com.example.hellomod.effect.FrostWalkerFoodEffect;
+import com.example.hellomod.enchantment.InfinityCooldownManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.text.Text;
@@ -23,9 +24,17 @@ public class HelloMod implements ModInitializer {
         // 注册冰霜行者食物效果的tick事件
         FrostWalkerFoodEffect.register();
 
+        // 注册无限附魔冷却管理器（tick事件）
+        InfinityCooldownManager.register();
+
         // 当玩家加入世界时，在聊天框输出 "hello"
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             handler.getPlayer().sendMessage(Text.literal("hello"), false);
+        });
+
+        // 玩家断开连接时清理无限冷却数据
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            InfinityCooldownManager.onPlayerDisconnect(handler.getPlayer().getUuid());
         });
     }
 }
