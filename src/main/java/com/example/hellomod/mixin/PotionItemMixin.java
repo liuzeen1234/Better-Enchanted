@@ -2,6 +2,8 @@ package com.example.hellomod.mixin;
 
 import com.example.hellomod.HelloMod;
 import com.example.hellomod.enchantment.InfinityCooldownManager;
+import com.example.hellomod.enchantment.ModEnchantments;
+import com.example.hellomod.enchantment.SwiftThrowEnchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
@@ -51,10 +53,12 @@ public abstract class PotionItemMixin {
         int flameLevel = EnchantmentHelper.getLevel(Enchantments.FLAME, stack);
         int infinityLevel = EnchantmentHelper.getLevel(Enchantments.INFINITY, stack);
         int channelingLevel = EnchantmentHelper.getLevel(Enchantments.CHANNELING, stack);
+        int swiftThrowLevel = EnchantmentHelper.getLevel(ModEnchantments.SWIFT_THROW, stack);
 
         // 如果没有任何附魔，让原版逻辑处理
         if (sharpnessLevel <= 0 && unbreakingLevel <= 0 && powerLevel <= 0
-                && punchLevel <= 0 && flameLevel <= 0 && infinityLevel <= 0 && channelingLevel <= 0) {
+                && punchLevel <= 0 && flameLevel <= 0 && infinityLevel <= 0 && channelingLevel <= 0
+                && swiftThrowLevel <= 0) {
             return;
         }
 
@@ -72,14 +76,24 @@ public abstract class PotionItemMixin {
             return;
         }
 
-        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}",
-                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel);
+        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}",
+                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel);
 
         if (!world.isClient()) {
             // 创建药水实体
             PotionEntity potionEntity = new PotionEntity(world, user);
             potionEntity.setItem(stack);
-            potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), -20.0f, 0.5f, 1.0f);
+
+            // 迅投附魔：提升初速度，每级增加50%原始初速度
+            // 公式：实际初速度 = 原始初速度(0.5f) × (1 + 0.5 × 等级)
+            float baseSpeed = 0.5f;
+            float actualSpeed = baseSpeed * SwiftThrowEnchantment.getSpeedMultiplier(swiftThrowLevel);
+            potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), -20.0f, actualSpeed, 1.0f);
+
+            if (swiftThrowLevel > 0) {
+                HelloMod.LOGGER.info("[PotionDebug] Swift Throw active! Level={}, speed multiplier={}x, actual speed={}",
+                        swiftThrowLevel, SwiftThrowEnchantment.getSpeedMultiplier(swiftThrowLevel), actualSpeed);
+            }
 
             // 将附魔信息写入投射物的自定义 NBT
             // PotionEntity 通过 setItem 保存了 ItemStack，附魔信息已经在 ItemStack 中
