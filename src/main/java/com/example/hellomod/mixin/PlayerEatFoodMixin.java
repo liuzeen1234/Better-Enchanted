@@ -23,8 +23,9 @@ public abstract class PlayerEatFoodMixin {
             int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, stack);
             if (sharpnessLevel > 0) {
                 PlayerEntity player = (PlayerEntity) (Object) this;
-                // 每级锋利造成1点伤害（1点 = 0.5颗心）
-                player.damage(world.getDamageSources().generic(), sharpnessLevel);
+                // 使用锋利附魔公式：0.5 × 等级 + 0.5
+                float damage = 0.5f * sharpnessLevel + 0.5f;
+                player.damage(world.getDamageSources().generic(), damage);
             }
         }
     }
