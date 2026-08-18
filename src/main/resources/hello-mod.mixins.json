@@ -6,7 +6,8 @@
     "mixins": [
         "PlayerEatFoodMixin",
         "CakeBlockMixin",
-        "CakePlaceMixin"
+        "CakePlaceMixin",
+        "EfficientEatingMixin"
     ],
     "client": [],
     "injectors": {

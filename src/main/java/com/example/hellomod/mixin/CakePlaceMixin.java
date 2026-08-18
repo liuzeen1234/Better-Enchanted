@@ -56,5 +56,13 @@ public abstract class CakePlaceMixin {
             HelloMod.LOGGER.info("[PlaceDebug] Storing fire_aspect {} at pos {}", fireAspectLevel, pos);
             CakeEnchantmentStorage.setFireAspect(pos, fireAspectLevel);
         }
+
+        // 存储效率附魔
+        int efficiencyLevel = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack);
+        HelloMod.LOGGER.info("[PlaceDebug] HEAD - Stack: {}, EfficiencyLevel: {}", stack, efficiencyLevel);
+        if (efficiencyLevel > 0) {
+            HelloMod.LOGGER.info("[PlaceDebug] Storing efficiency {} at pos {}", efficiencyLevel, pos);
+            CakeEnchantmentStorage.setEfficiency(pos, efficiencyLevel);
+        }
     }
 }
