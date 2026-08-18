@@ -88,7 +88,12 @@ public abstract class PotionItemMixin {
             // 公式：实际初速度 = 原始初速度(0.5f) × (1 + 0.5 × 等级)
             float baseSpeed = 0.5f;
             float actualSpeed = baseSpeed * SwiftThrowEnchantment.getSpeedMultiplier(swiftThrowLevel);
-            potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), -20.0f, actualSpeed, 1.0f);
+
+            // 迅投附魔：调整发射方向偏移角度
+            // 公式：y = 80/(4+x)，y为向上偏移角度，x为附魔等级（x>=0）
+            // x=0 时 y=20（原版药水行为），等级越高偏移越小（越接近平射）
+            float pitchOffset = -80.0f / (4.0f + swiftThrowLevel);
+            potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), pitchOffset, actualSpeed, 1.0f);
 
             if (swiftThrowLevel > 0) {
                 HelloMod.LOGGER.info("[PotionDebug] Swift Throw active! Level={}, speed multiplier={}x, actual speed={}",
