@@ -18,6 +18,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,13 +31,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * 功能：
  * 1. 将药水上的附魔信息通过 NBT 传递给 PotionEntity（投射物）
  * 2. 耐久附魔：投掷后有概率不消耗药水
- *    - 参考MC 1.20.4原版耐久逻辑：消耗概率 = 1/(level+1)
- *    - 即 level/(level+1) 的概率不消耗
  * 3. 无限附魔 (Infinity)：投掷不消耗药水
- *    - 若同时有耐久：耐久判定成功 → 不进入冷却；判定失败 → 进入10s冷却
- *    - 若没有耐久：始终进入10s冷却
- *    - 冷却通过自定义 InfinityCooldownManager 管理（基于 NBT 标记）
- *    - 只有带 InfinityMarked NBT 的物品会受冷却影响，不影响同种未附魔物品
+ * 4. 迅投 (Swift Throw)：提升初速度 + 调整发射角度
+ *    - 等级 1-20：正常物理投掷，速度按公式增加
+ *    - 等级 >20：射线追踪模式，通过NBT标记让PotionEntityMixin处理瞬移逻辑
  */
 @Mixin(ThrowablePotionItem.class)
 public abstract class PotionItemMixin {
@@ -92,17 +90,77 @@ public abstract class PotionItemMixin {
             // 迅投附魔：调整发射方向偏移角度
             // 公式：y = 80/(4+x)，y为向上偏移角度，x为附魔等级（x>=0）
             // x=0 时 y=20（原版药水行为），等级越高偏移越小（越接近平射）
-            float pitchOffset = -80.0f / (4.0f + swiftThrowLevel);
-            potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), pitchOffset, actualSpeed, 1.0f);
+            // 当偏移角度<1时直接设为0
+            float pitchOffsetDeg = 80.0f / (4.0f + swiftThrowLevel);
+            float pitchOffset = pitchOffsetDeg < 1.0f ? 0.0f : -pitchOffsetDeg;
 
-            if (swiftThrowLevel > 0) {
-                HelloMod.LOGGER.info("[PotionDebug] Swift Throw active! Level={}, speed multiplier={}x, actual speed={}",
-                        swiftThrowLevel, SwiftThrowEnchantment.getSpeedMultiplier(swiftThrowLevel), actualSpeed);
+            if (swiftThrowLevel > 20) {
+                // 等级>20：射线追踪模式
+                // 将速度限制在安全范围（5.5，等同于20级），方向正确
+                // 通过NBT标记让SwiftThrowTickMixin每tick做射线追踪传送
+                float safeLaunchSpeed = baseSpeed * SwiftThrowEnchantment.getSpeedMultiplier(20);
+
+                float adjustedPitch = user.getPitch() + pitchOffset;
+                float yawRad = user.getYaw() * ((float) Math.PI / 180.0f);
+                float pitchRad = adjustedPitch * ((float) Math.PI / 180.0f);
+
+                double vx = -Math.sin(yawRad) * Math.cos(pitchRad);
+                double vy = -Math.sin(pitchRad);
+                double vz = Math.cos(yawRad) * Math.cos(pitchRad);
+
+                Vec3d direction = new Vec3d(vx, vy, vz).normalize();
+
+                // 设置安全速度用于生成（确保不会碰到自己）
+                potionEntity.setVelocity(direction.multiply(safeLaunchSpeed));
+
+                // 将生成位置沿发射方向前移
+                potionEntity.setPosition(
+                        potionEntity.getX() + direction.x * 1.5,
+                        potionEntity.getY() + direction.y * 1.5,
+                        potionEntity.getZ() + direction.z * 1.5
+                );
+
+                // 在药水的NBT中写入射线追踪信息
+                // SwiftThrowTickMixin 会读取这些数据在每tick做射线追踪传送
+                NbtCompound potionNbt = potionEntity.getStack().getOrCreateNbt();
+                potionNbt.putBoolean("SwiftThrowRaycast", true);
+                potionNbt.putFloat("SwiftThrowSpeed", actualSpeed);
+                // 存储方向向量（归一化）
+                potionNbt.putDouble("SwiftThrowDirX", direction.x);
+                potionNbt.putDouble("SwiftThrowDirY", direction.y);
+                potionNbt.putDouble("SwiftThrowDirZ", direction.z);
+
+                HelloMod.LOGGER.info("[SwiftThrow] Raycast mode! Level={}, speed={}, direction=({}, {}, {})",
+                        swiftThrowLevel, actualSpeed, direction.x, direction.y, direction.z);
+
+            } else if (swiftThrowLevel > 0) {
+                // 等级1-20：正常物理投掷，手动计算方向
+                float adjustedPitch = user.getPitch() + pitchOffset;
+                float yawRad = user.getYaw() * ((float) Math.PI / 180.0f);
+                float pitchRad = adjustedPitch * ((float) Math.PI / 180.0f);
+
+                double vx = -Math.sin(yawRad) * Math.cos(pitchRad);
+                double vy = -Math.sin(pitchRad);
+                double vz = Math.cos(yawRad) * Math.cos(pitchRad);
+
+                Vec3d direction = new Vec3d(vx, vy, vz).normalize().multiply(actualSpeed);
+                potionEntity.setVelocity(direction);
+
+                // 将生成位置沿发射方向前移
+                Vec3d normalizedDir = direction.normalize();
+                potionEntity.setPosition(
+                        potionEntity.getX() + normalizedDir.x * 1.0,
+                        potionEntity.getY() + normalizedDir.y * 1.0,
+                        potionEntity.getZ() + normalizedDir.z * 1.0
+                );
+
+                HelloMod.LOGGER.info("[SwiftThrow] Normal mode! Level={}, speed={}", swiftThrowLevel, actualSpeed);
+            } else {
+                // 无迅投时使用原版逻辑
+                potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), -20.0f, actualSpeed, 1.0f);
             }
 
             // 将附魔信息写入投射物的自定义 NBT
-            // PotionEntity 通过 setItem 保存了 ItemStack，附魔信息已经在 ItemStack 中
-            // 但我们额外存一份到 entity NBT 以便命中时快速读取
             NbtCompound entityNbt = new NbtCompound();
             if (sharpnessLevel > 0) {
                 entityNbt.putInt("SharpnessLevel", sharpnessLevel);
@@ -120,33 +178,24 @@ public abstract class PotionItemMixin {
         // 统计
         user.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
 
-        // 消耗与冷却逻辑（仅服务端执行，避免单人游戏中客户端/服务端共享static状态的问题）
+        // 消耗与冷却逻辑（仅服务端执行）
         if (!world.isClient() && !user.getAbilities().creativeMode) {
             if (infinityLevel > 0) {
-                // 无限附魔：不消耗药水，但需要判定冷却
                 if (unbreakingLevel > 0) {
-                    // 有耐久附魔：进行耐久判定
-                    // 判定成功（不消耗）→ 不进入冷却
-                    // 判定失败（消耗）→ 进入10s冷却
                     if (user.getRandom().nextInt(unbreakingLevel + 1) > 0) {
-                        // 耐久判定成功：不冷却
                         HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check PASSED, no cooldown.");
                     } else {
-                        // 耐久判定失败：进入10s冷却（自定义冷却，只影响带标记的物品）
                         InfinityCooldownManager.triggerCooldown(user);
                         HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, 10s cooldown applied.");
                     }
                 } else {
-                    // 没有耐久附魔：始终进入10s冷却
                     InfinityCooldownManager.triggerCooldown(user);
                     HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: 10s cooldown applied.");
                 }
                 HelloMod.LOGGER.info("[PotionDebug] Infinity active! Potion NOT consumed.");
             } else if (unbreakingLevel > 0 && user.getRandom().nextInt(unbreakingLevel + 1) > 0) {
-                // 仅耐久附魔（无无限）：耐久触发，不消耗药水
                 HelloMod.LOGGER.info("[PotionDebug] Unbreaking triggered! Potion NOT consumed.");
             } else {
-                // 无无限且无耐久 / 耐久判定失败：正常消耗
                 stack.decrement(1);
                 HelloMod.LOGGER.info("[PotionDebug] Potion consumed normally.");
             }

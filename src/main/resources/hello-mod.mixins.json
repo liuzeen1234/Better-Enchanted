@@ -10,7 +10,8 @@
         "EfficientEatingMixin",
         "UnbreakingFoodMixin",
         "PotionItemMixin",
-        "PotionEntityMixin"
+        "PotionEntityMixin",
+        "SwiftThrowTickMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin"
