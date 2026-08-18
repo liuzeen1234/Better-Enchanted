@@ -2,6 +2,7 @@ package com.example.hellomod.mixin;
 
 import com.example.hellomod.HelloMod;
 import com.example.hellomod.block.CakeEnchantmentStorage;
+import com.example.hellomod.effect.FrostWalkerFoodEffect;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CakeBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -49,6 +50,14 @@ public abstract class CakeBlockMixin {
                 if (fireAspectLevel > 0) {
                     player.setOnFireFor(fireAspectLevel * 4);
                     HelloMod.LOGGER.info("[CakeDebug] Set player on fire for {} seconds (level {})", fireAspectLevel * 4, fireAspectLevel);
+                }
+
+                // 冰霜行者附魔：获得冰霜行者效果
+                int frostWalkerLevel = CakeEnchantmentStorage.getFrostWalker(pos);
+                HelloMod.LOGGER.info("[CakeDebug] Server side - FrostWalkerLevel from storage: {}", frostWalkerLevel);
+                if (frostWalkerLevel > 0) {
+                    FrostWalkerFoodEffect.apply(player, frostWalkerLevel);
+                    HelloMod.LOGGER.info("[CakeDebug] Applied Frost Walker level {} to player", frostWalkerLevel);
                 }
 
                 // 如果蛋糕被吃完了（方块不再是蛋糕），移除存储

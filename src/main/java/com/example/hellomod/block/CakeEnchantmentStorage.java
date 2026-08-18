@@ -15,6 +15,7 @@ public class CakeEnchantmentStorage {
     private static final Map<BlockPos, Integer> KNOCKBACK_MAP = new HashMap<>();
     private static final Map<BlockPos, Integer> FIRE_ASPECT_MAP = new HashMap<>();
     private static final Map<BlockPos, Integer> EFFICIENCY_MAP = new HashMap<>();
+    private static final Map<BlockPos, Integer> FROST_WALKER_MAP = new HashMap<>();
 
     // === 锋利 ===
 
@@ -64,6 +65,18 @@ public class CakeEnchantmentStorage {
         return EFFICIENCY_MAP.getOrDefault(normalizePos(pos), 0);
     }
 
+    // === 冰霜行者 ===
+
+    public static void setFrostWalker(BlockPos pos, int level) {
+        if (level > 0) {
+            FROST_WALKER_MAP.put(pos.toImmutable(), level);
+        }
+    }
+
+    public static int getFrostWalker(BlockPos pos) {
+        return FROST_WALKER_MAP.getOrDefault(normalizePos(pos), 0);
+    }
+
     // === 通用 ===
 
     public static void remove(BlockPos pos) {
@@ -72,11 +85,14 @@ public class CakeEnchantmentStorage {
         KNOCKBACK_MAP.remove(normalized);
         FIRE_ASPECT_MAP.remove(normalized);
         EFFICIENCY_MAP.remove(normalized);
+        FROST_WALKER_MAP.remove(normalized);
     }
 
     public static boolean has(BlockPos pos) {
         BlockPos normalized = normalizePos(pos);
-        return SHARPNESS_MAP.containsKey(normalized) || KNOCKBACK_MAP.containsKey(normalized) || FIRE_ASPECT_MAP.containsKey(normalized) || EFFICIENCY_MAP.containsKey(normalized);
+        return SHARPNESS_MAP.containsKey(normalized) || KNOCKBACK_MAP.containsKey(normalized)
+                || FIRE_ASPECT_MAP.containsKey(normalized) || EFFICIENCY_MAP.containsKey(normalized)
+                || FROST_WALKER_MAP.containsKey(normalized);
     }
 
     private static BlockPos normalizePos(BlockPos pos) {

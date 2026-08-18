@@ -1,6 +1,7 @@
 package com.example.hellomod;
 
 import com.example.hellomod.block.HelloModBlockEntities;
+import com.example.hellomod.effect.FrostWalkerFoodEffect;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.text.Text;
@@ -18,6 +19,9 @@ public class HelloMod implements ModInitializer {
 
         // 注册方块实体
         HelloModBlockEntities.register();
+
+        // 注册冰霜行者食物效果的tick事件
+        FrostWalkerFoodEffect.register();
 
         // 当玩家加入世界时，在聊天框输出 "hello"
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {

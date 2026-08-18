@@ -1,6 +1,7 @@
 package com.example.hellomod.mixin;
 
 import com.example.hellomod.HelloMod;
+import com.example.hellomod.effect.FrostWalkerFoodEffect;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
@@ -49,6 +50,14 @@ public abstract class PlayerEatFoodMixin {
             if (fireAspectLevel > 0) {
                 player.setOnFireFor(fireAspectLevel * 4);
                 HelloMod.LOGGER.info("[FoodDebug] Set player on fire for {} seconds", fireAspectLevel * 4);
+            }
+
+            // 冰霜行者附魔：获得冰霜行者效果
+            int frostWalkerLevel = EnchantmentHelper.getLevel(Enchantments.FROST_WALKER, stack);
+            HelloMod.LOGGER.info("[FoodDebug] Frost Walker level: {}", frostWalkerLevel);
+            if (frostWalkerLevel > 0) {
+                FrostWalkerFoodEffect.apply(player, frostWalkerLevel);
+                HelloMod.LOGGER.info("[FoodDebug] Applied Frost Walker level {} to player", frostWalkerLevel);
             }
         }
     }

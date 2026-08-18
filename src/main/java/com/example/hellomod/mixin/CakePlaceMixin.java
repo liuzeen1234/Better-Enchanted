@@ -64,5 +64,13 @@ public abstract class CakePlaceMixin {
             HelloMod.LOGGER.info("[PlaceDebug] Storing efficiency {} at pos {}", efficiencyLevel, pos);
             CakeEnchantmentStorage.setEfficiency(pos, efficiencyLevel);
         }
+
+        // 存储冰霜行者附魔
+        int frostWalkerLevel = EnchantmentHelper.getLevel(Enchantments.FROST_WALKER, stack);
+        HelloMod.LOGGER.info("[PlaceDebug] HEAD - Stack: {}, FrostWalkerLevel: {}", stack, frostWalkerLevel);
+        if (frostWalkerLevel > 0) {
+            HelloMod.LOGGER.info("[PlaceDebug] Storing frost_walker {} at pos {}", frostWalkerLevel, pos);
+            CakeEnchantmentStorage.setFrostWalker(pos, frostWalkerLevel);
+        }
     }
 }
