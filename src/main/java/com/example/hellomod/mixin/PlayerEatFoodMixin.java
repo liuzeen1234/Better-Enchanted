@@ -1,6 +1,7 @@
 package com.example.hellomod.mixin;
 
 import com.example.hellomod.HelloMod;
+import com.example.hellomod.damage.SharpFoodDamageSource;
 import com.example.hellomod.effect.FrostWalkerFoodEffect;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -27,12 +28,12 @@ public abstract class PlayerEatFoodMixin {
                 world.isClient(), stack.getItem(), stack.getNbt());
 
         if (!world.isClient()) {
-            // 锋利附魔：造成伤害
+            // 锋利附魔：造成伤害（使用自定义伤害源，死亡消息显示食物名称）
             int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, stack);
             if (sharpnessLevel > 0) {
                 float damage = 0.5f * sharpnessLevel + 0.5f;
                 HelloMod.LOGGER.info("[FoodDebug] Sharpness level: {}, damage: {}", sharpnessLevel, damage);
-                player.damage(world.getDamageSources().generic(), damage);
+                player.damage(SharpFoodDamageSource.create(world, stack), damage);
             }
 
             // 击退附魔：对食用者施加击退

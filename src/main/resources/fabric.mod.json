@@ -12,6 +12,9 @@
     "entrypoints": {
         "main": [
             "com.example.hellomod.HelloMod"
+        ],
+        "client": [
+            "com.example.hellomod.client.HelloModClient"
         ]
     },
     "mixins": [

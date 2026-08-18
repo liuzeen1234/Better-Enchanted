@@ -72,5 +72,13 @@ public abstract class CakePlaceMixin {
             HelloMod.LOGGER.info("[PlaceDebug] Storing frost_walker {} at pos {}", frostWalkerLevel, pos);
             CakeEnchantmentStorage.setFrostWalker(pos, frostWalkerLevel);
         }
+
+        // 存储耐久附魔
+        int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
+        HelloMod.LOGGER.info("[PlaceDebug] HEAD - Stack: {}, UnbreakingLevel: {}", stack, unbreakingLevel);
+        if (unbreakingLevel > 0) {
+            HelloMod.LOGGER.info("[PlaceDebug] Storing unbreaking {} at pos {}", unbreakingLevel, pos);
+            CakeEnchantmentStorage.setUnbreaking(pos, unbreakingLevel);
+        }
     }
 }
