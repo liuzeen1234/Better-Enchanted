@@ -22,14 +22,28 @@ public class HelloModClient implements ClientModInitializer {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("hello-mod");
     private int lastCount = -1;
 
-    /** 切换实体血量 HUD 的按键，默认 H */
+    /** 手持物品显示是否开启 */
+    private static boolean itemHudEnabled = true;
+
+    /** 切换实体血量 HUD 的按键，默认无绑定 */
     private static KeyBinding toggleHealthHudKey;
+
+    /** 切换手持物品显示的按键，默认无绑定 */
+    private static KeyBinding toggleItemHudKey;
 
     @Override
     public void onInitializeClient() {
-        // 注册按键绑定: H 键切换实体血量显示
+        // 注册按键绑定: 切换实体血量显示（默认无绑定）
         toggleHealthHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.hello-mod.toggle_health_hud", // 翻译键
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN, // 默认无绑定，玩家可自行设置
+                "category.hello-mod.hud" // 按键分类
+        ));
+
+        // 注册按键绑定: 切换手持物品显示（默认无绑定）
+        toggleItemHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.hello-mod.toggle_item_hud", // 翻译键
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN, // 默认无绑定，玩家可自行设置
                 "category.hello-mod.hud" // 按键分类
@@ -47,6 +61,16 @@ public class HelloModClient implements ClientModInitializer {
                     );
                 }
             }
+            while (toggleItemHudKey.wasPressed()) {
+                itemHudEnabled = !itemHudEnabled;
+                if (client.player != null) {
+                    String status = itemHudEnabled ? "§a开启" : "§c关闭";
+                    client.player.sendMessage(
+                            Text.literal("§7[手持物品显示] " + status),
+                            true // actionBar
+                    );
+                }
+            }
         });
 
         // 注册 HUD 渲染回调
@@ -60,6 +84,8 @@ public class HelloModClient implements ClientModInitializer {
     }
 
     private void renderItemCountHud(DrawContext drawContext) {
+        if (!itemHudEnabled) return;
+
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
