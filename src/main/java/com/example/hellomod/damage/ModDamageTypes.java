@@ -19,4 +19,13 @@ public class ModDamageTypes {
             RegistryKeys.DAMAGE_TYPE,
             new Identifier(HelloMod.MOD_ID, "sharp_food")
     );
+
+    /**
+     * 锋利药水伤害类型的注册键。
+     * 对应 data/hello-mod/damage_type/sharp_potion.json
+     */
+    public static final RegistryKey<DamageType> SHARP_POTION = RegistryKey.of(
+            RegistryKeys.DAMAGE_TYPE,
+            new Identifier(HelloMod.MOD_ID, "sharp_potion")
+    );
 }

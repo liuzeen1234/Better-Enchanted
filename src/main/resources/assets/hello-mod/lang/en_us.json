@@ -1,4 +1,5 @@
 {
   "death.attack.hello-mod.sharp_food": "%1$s had their throat cut by sharp food",
-  "death.attack.hello-mod.sharp_food.item": "%1$s had their throat cut by %2$s"
+  "death.attack.hello-mod.sharp_food.item": "%1$s had their throat cut by %2$s",
+  "death.attack.hello-mod.sharp_potion": "%1$s was shattered by a sharp potion"
 }

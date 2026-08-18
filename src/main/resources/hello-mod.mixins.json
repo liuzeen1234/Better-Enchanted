@@ -8,7 +8,9 @@
         "CakeBlockMixin",
         "CakePlaceMixin",
         "EfficientEatingMixin",
-        "UnbreakingFoodMixin"
+        "UnbreakingFoodMixin",
+        "PotionItemMixin",
+        "PotionEntityMixin"
     ],
     "client": [],
     "injectors": {
