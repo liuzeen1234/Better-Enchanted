@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(BlockItem.class)
 public abstract class CakePlaceMixin {
@@ -32,12 +31,22 @@ public abstract class CakePlaceMixin {
         // 检查是否是蛋糕物品
         if (stack.getItem() != Blocks.CAKE.asItem()) return;
 
+        BlockPos pos = context.getBlockPos();
+
+        // 存储锋利附魔
         int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, stack);
         HelloMod.LOGGER.info("[PlaceDebug] HEAD - Stack: {}, SharpnessLevel: {}", stack, sharpnessLevel);
         if (sharpnessLevel > 0) {
-            BlockPos pos = context.getBlockPos();
             HelloMod.LOGGER.info("[PlaceDebug] Storing sharpness {} at pos {}", sharpnessLevel, pos);
             CakeEnchantmentStorage.set(pos, sharpnessLevel);
+        }
+
+        // 存储击退附魔
+        int knockbackLevel = EnchantmentHelper.getLevel(Enchantments.KNOCKBACK, stack);
+        HelloMod.LOGGER.info("[PlaceDebug] HEAD - Stack: {}, KnockbackLevel: {}", stack, knockbackLevel);
+        if (knockbackLevel > 0) {
+            HelloMod.LOGGER.info("[PlaceDebug] Storing knockback {} at pos {}", knockbackLevel, pos);
+            CakeEnchantmentStorage.setKnockback(pos, knockbackLevel);
         }
     }
 }
