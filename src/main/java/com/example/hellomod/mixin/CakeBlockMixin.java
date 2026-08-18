@@ -42,6 +42,15 @@ public abstract class CakeBlockMixin {
                     HelloMod.LOGGER.info("[CakeDebug] Applied knockback level {} to player", knockbackLevel);
                 }
 
+                // 火焰附加附魔：点燃食用者
+                // 参考MC 1.20.4原版火焰附加逻辑：target.setOnFireFor(level * 4)
+                int fireAspectLevel = CakeEnchantmentStorage.getFireAspect(pos);
+                HelloMod.LOGGER.info("[CakeDebug] Server side - FireAspectLevel from storage: {}", fireAspectLevel);
+                if (fireAspectLevel > 0) {
+                    player.setOnFireFor(fireAspectLevel * 4);
+                    HelloMod.LOGGER.info("[CakeDebug] Set player on fire for {} seconds (level {})", fireAspectLevel * 4, fireAspectLevel);
+                }
+
                 // 如果蛋糕被吃完了（方块不再是蛋糕），移除存储
                 if (!realWorld.getBlockState(pos).isOf(net.minecraft.block.Blocks.CAKE)) {
                     CakeEnchantmentStorage.remove(pos);

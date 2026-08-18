@@ -48,5 +48,13 @@ public abstract class CakePlaceMixin {
             HelloMod.LOGGER.info("[PlaceDebug] Storing knockback {} at pos {}", knockbackLevel, pos);
             CakeEnchantmentStorage.setKnockback(pos, knockbackLevel);
         }
+
+        // 存储火焰附加附魔
+        int fireAspectLevel = EnchantmentHelper.getLevel(Enchantments.FIRE_ASPECT, stack);
+        HelloMod.LOGGER.info("[PlaceDebug] HEAD - Stack: {}, FireAspectLevel: {}", stack, fireAspectLevel);
+        if (fireAspectLevel > 0) {
+            HelloMod.LOGGER.info("[PlaceDebug] Storing fire_aspect {} at pos {}", fireAspectLevel, pos);
+            CakeEnchantmentStorage.setFireAspect(pos, fireAspectLevel);
+        }
     }
 }

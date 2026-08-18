@@ -13,6 +13,7 @@ public class CakeEnchantmentStorage {
 
     private static final Map<BlockPos, Integer> SHARPNESS_MAP = new HashMap<>();
     private static final Map<BlockPos, Integer> KNOCKBACK_MAP = new HashMap<>();
+    private static final Map<BlockPos, Integer> FIRE_ASPECT_MAP = new HashMap<>();
 
     // === 锋利 ===
 
@@ -38,17 +39,30 @@ public class CakeEnchantmentStorage {
         return KNOCKBACK_MAP.getOrDefault(normalizePos(pos), 0);
     }
 
+    // === 火焰附加 ===
+
+    public static void setFireAspect(BlockPos pos, int level) {
+        if (level > 0) {
+            FIRE_ASPECT_MAP.put(pos.toImmutable(), level);
+        }
+    }
+
+    public static int getFireAspect(BlockPos pos) {
+        return FIRE_ASPECT_MAP.getOrDefault(normalizePos(pos), 0);
+    }
+
     // === 通用 ===
 
     public static void remove(BlockPos pos) {
         BlockPos normalized = normalizePos(pos);
         SHARPNESS_MAP.remove(normalized);
         KNOCKBACK_MAP.remove(normalized);
+        FIRE_ASPECT_MAP.remove(normalized);
     }
 
     public static boolean has(BlockPos pos) {
         BlockPos normalized = normalizePos(pos);
-        return SHARPNESS_MAP.containsKey(normalized) || KNOCKBACK_MAP.containsKey(normalized);
+        return SHARPNESS_MAP.containsKey(normalized) || KNOCKBACK_MAP.containsKey(normalized) || FIRE_ASPECT_MAP.containsKey(normalized);
     }
 
     private static BlockPos normalizePos(BlockPos pos) {

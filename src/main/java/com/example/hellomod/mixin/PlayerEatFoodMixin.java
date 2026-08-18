@@ -40,6 +40,16 @@ public abstract class PlayerEatFoodMixin {
             if (knockbackLevel > 0) {
                 applyKnockback(player, knockbackLevel);
             }
+
+            // 火焰附加附魔：点燃食用者
+            // 参考MC 1.20.4原版火焰附加逻辑：在EnchantmentHelper.onTargetDamaged中
+            // 调用target.setOnFireFor(level * 4)，即每级点燃4秒
+            int fireAspectLevel = EnchantmentHelper.getLevel(Enchantments.FIRE_ASPECT, stack);
+            HelloMod.LOGGER.info("[FoodDebug] Fire Aspect level: {}", fireAspectLevel);
+            if (fireAspectLevel > 0) {
+                player.setOnFireFor(fireAspectLevel * 4);
+                HelloMod.LOGGER.info("[FoodDebug] Set player on fire for {} seconds", fireAspectLevel * 4);
+            }
         }
     }
 
