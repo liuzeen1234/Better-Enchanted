@@ -50,10 +50,11 @@ public abstract class PotionItemMixin {
         int punchLevel = EnchantmentHelper.getLevel(Enchantments.PUNCH, stack);
         int flameLevel = EnchantmentHelper.getLevel(Enchantments.FLAME, stack);
         int infinityLevel = EnchantmentHelper.getLevel(Enchantments.INFINITY, stack);
+        int channelingLevel = EnchantmentHelper.getLevel(Enchantments.CHANNELING, stack);
 
         // 如果没有任何附魔，让原版逻辑处理
         if (sharpnessLevel <= 0 && unbreakingLevel <= 0 && powerLevel <= 0
-                && punchLevel <= 0 && flameLevel <= 0 && infinityLevel <= 0) {
+                && punchLevel <= 0 && flameLevel <= 0 && infinityLevel <= 0 && channelingLevel <= 0) {
             return;
         }
 
@@ -71,8 +72,8 @@ public abstract class PotionItemMixin {
             return;
         }
 
-        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}",
-                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel);
+        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}",
+                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel);
 
         if (!world.isClient()) {
             // 创建药水实体

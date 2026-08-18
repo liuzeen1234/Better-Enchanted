@@ -6,12 +6,17 @@ import com.example.hellomod.damage.SharpPotionDamageSource;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -23,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 /**
- * Mixin PotionEntity，在药水碰撞时应用锋利、力量、冲击和火矢附魔效果。
+ * Mixin PotionEntity，在药水碰撞时应用锋利、力量、冲击、火矢和引雷附魔效果。
  *
  * 锋利 (Sharpness) [药水]：
  * - 掷出的药水砸中实体时造成伤害
@@ -50,6 +55,14 @@ import java.util.List;
  *   直接命中的实体着火5秒（100 ticks）
  *   溅射范围内的实体也会着火，时长按距离衰减
  * - 火矢附魔只有1级（与原版一致）
+ *
+ * 引雷 (Channeling) [药水]：
+ * - 基于MC 1.20.4三叉戟引雷规则改良为AOE版本：
+ *   1. 必须为雷暴天气（world.isThundering()）
+ *   2. 对药水落点周围4格范围内的所有实体逐一检查
+ *   3. 每个实体位置必须能看到天空（isSkyVisible）
+ *   4. 满足条件时，在该实体位置各召唤一道闪电
+ * - 引雷附魔只有1级（与原版一致）
  */
 @Mixin(PotionEntity.class)
 public abstract class PotionEntityMixin {
@@ -68,8 +81,9 @@ public abstract class PotionEntityMixin {
         int powerLevel = EnchantmentHelper.getLevel(Enchantments.POWER, potionStack);
         int punchLevel = EnchantmentHelper.getLevel(Enchantments.PUNCH, potionStack);
         int flameLevel = EnchantmentHelper.getLevel(Enchantments.FLAME, potionStack);
+        int channelingLevel = EnchantmentHelper.getLevel(Enchantments.CHANNELING, potionStack);
 
-        if (sharpnessLevel <= 0 && powerLevel <= 0 && punchLevel <= 0 && flameLevel <= 0) {
+        if (sharpnessLevel <= 0 && powerLevel <= 0 && punchLevel <= 0 && flameLevel <= 0 && channelingLevel <= 0) {
             return;
         }
 
@@ -195,6 +209,41 @@ public abstract class PotionEntityMixin {
                                 entity.getName().getString(), fireDuration, distance, entity.getHealth(), entity.getMaxHealth());
                     }
                 }
+            }
+        }
+
+        // 引雷 (Channeling)：对药水落点周围4格范围内所有实体各召唤一道闪电
+        // 基于MC 1.20.4三叉戟引雷规则改良为AOE版本
+        // 条件1：必须是雷暴天气（world.isThundering()）
+        // 条件2：每个实体位置必须能看到天空（isSkyVisible）
+        if (channelingLevel > 0 && world instanceof ServerWorld serverWorld) {
+            if (serverWorld.isThundering()) {
+                // 获取4格范围内的所有活着的实体（同锋利的溅射范围）
+                Box channelingBox = new Box(self.getX() - 4.0, self.getY() - 2.0, self.getZ() - 4.0,
+                        self.getX() + 4.0, self.getY() + 2.0, self.getZ() + 4.0);
+                List<LivingEntity> channelingTargets = world.getEntitiesByClass(LivingEntity.class, channelingBox,
+                        entity -> entity.isAlive() && entity.squaredDistanceTo(self) <= 16.0);
+
+                ServerPlayerEntity channeler = self.getOwner() instanceof ServerPlayerEntity player ? player : null;
+
+                for (LivingEntity target : channelingTargets) {
+                    BlockPos targetPos = target.getBlockPos();
+                    if (serverWorld.isSkyVisible(targetPos)) {
+                        LightningEntity lightning = EntityType.LIGHTNING_BOLT.create(serverWorld);
+                        if (lightning != null) {
+                            lightning.refreshPositionAfterTeleport(Vec3d.ofBottomCenter(targetPos));
+                            lightning.setChanneler(channeler);
+                            serverWorld.spawnEntity(lightning);
+                            HelloMod.LOGGER.info("[PotionDamage] Channeling struck lightning at entity: {} pos=({}, {}, {})",
+                                    target.getName().getString(), targetPos.getX(), targetPos.getY(), targetPos.getZ());
+                        }
+                    } else {
+                        HelloMod.LOGGER.info("[PotionDamage] Channeling skipped entity (no sky): {} pos=({}, {}, {})",
+                                target.getName().getString(), targetPos.getX(), targetPos.getY(), targetPos.getZ());
+                    }
+                }
+            } else {
+                HelloMod.LOGGER.info("[PotionDamage] Channeling not triggered: not thundering");
             }
         }
     }
