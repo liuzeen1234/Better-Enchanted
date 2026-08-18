@@ -2,6 +2,7 @@
   "death.attack.hello-mod.sharp_food": "%1$s had their throat cut by sharp food",
   "death.attack.hello-mod.sharp_food.item": "%1$s had their throat cut by %2$s",
   "death.attack.hello-mod.sharp_potion": "%1$s was shattered by a sharp potion",
+  "death.attack.hello-mod.power_potion": "%1$s was obliterated by a powerful potion",
   "category.hello-mod.hud": "Hello Mod HUD",
   "key.hello-mod.toggle_health_hud": "Toggle Entity Health HUD",
   "key.hello-mod.toggle_item_hud": "Toggle Held Item Display"

@@ -41,14 +41,15 @@ public abstract class PotionItemMixin {
         // 检查是否有我们关心的附魔
         int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, stack);
         int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
+        int powerLevel = EnchantmentHelper.getLevel(Enchantments.POWER, stack);
 
         // 如果没有任何附魔，让原版逻辑处理
-        if (sharpnessLevel <= 0 && unbreakingLevel <= 0) {
+        if (sharpnessLevel <= 0 && unbreakingLevel <= 0 && powerLevel <= 0) {
             return;
         }
 
-        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}",
-                sharpnessLevel, unbreakingLevel);
+        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}",
+                sharpnessLevel, unbreakingLevel, powerLevel);
 
         if (!world.isClient()) {
             // 创建药水实体
