@@ -1,0 +1,50 @@
+武器附魔（剑）（食物）
+    锋利 (Sharpness) — 增加近战伤害（食用者受伤）
+亡灵杀手 (Smite) — 对亡灵生物增加伤害
+节肢杀手 (Bane of Arthropods) — 对节肢生物增加伤害
+    击退 (Knockback) — 增加击退距离（击退食用者）
+    火焰附加 (Fire Aspect) — 点燃目标（点燃食用者）
+抢夺 (Looting) — 增加生物掉落物
+横扫之刃 (Sweeping Edge) — 增加横扫攻击伤害
+弓附魔(药水)
+    力量 (Power) — 增加箭矢伤害（掷出的药水对砸中的实体造成伤害）
+    冲击 (Punch) — 增加箭矢击退（掷出的药水对砸中的实体造成击退）
+    火矢 (Flame) — 点燃箭矢（掷出的药水点燃砸中的实体）
+    无限 (Infinity) — 无限箭矢（掷出的药水不消耗）
+弩附魔（药水）
+    多重射击 (Multishot) — 一次射出三支箭（一次掷出多个药水瓶）
+    穿透 (Piercing) — 箭矢穿透实体（掷出的药水穿透砸中的实体）
+快速装填 (Quick Charge) — 减少装填时间
+三叉戟附魔（药水）
+    忠诚 (Loyalty) — 投掷后自动返回（药水投掷后自动返回）
+    引雷 (Channeling) — 雷暴天气中召唤闪电（雷暴时掷出的药水砸中实体时在药水所在位置召唤闪电）
+激流 (Riptide) — 在水中/雨中向前冲刺
+穿刺 (Impaling) — 对水生生物增加伤害
+护甲附魔（食物）
+保护 (Protection) — 减少所有伤害
+火焰保护 (Fire Protection) — 减少火焰伤害
+爆炸保护 (Blast Protection) — 减少爆炸伤害
+弹射物保护 (Projectile Protection) — 减少弹射物伤害
+    荆棘 (Thorns) — 反弹伤害给攻击者（同锋利）
+头盔附魔
+水下呼吸 (Respiration) — 延长水下呼吸时间
+水下速掘 (Aqua Affinity) — 水下挖掘速度正常
+靴子附魔
+摔落保护 (Feather Falling) — 减少摔落伤害
+深海探索者 (Depth Strider) — 增加水下移动速度
+    冰霜行者 (Frost Walker) — 水面结冰（对食用者造成2点霜冻伤害）
+灵魂疾行 (Soul Speed) — 在灵魂沙上加速
+工具附魔（食物）
+    效率 (Efficiency) — 加快挖掘速度（加快食用速度）
+精准采集 (Silk Touch) — 采集方块本身
+时运 (Fortune) — 增加方块掉落物
+钓鱼竿附魔
+海之眷顾 (Luck of the Sea) — 增加宝藏几率
+饵钓 (Lure) — 减少等待时间
+通用附魔（食物与药水）
+    耐久 (Unbreaking) — 减少耐久消耗（使用或食用后有概率不消耗）
+经验修补 (Mending) — 经验值修复耐久
+消失诅咒 (Curse of Vanishing) — 死亡时物品消失
+绑定诅咒 (Curse of Binding) — 装备后无法取下
+1.20新增（狼铠相关不在1.20.4）
+迅捷潜行 (Swift Sneak) — 增加潜行速度（裤子）
