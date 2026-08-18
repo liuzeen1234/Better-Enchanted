@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 /**
- * Mixin PotionEntity，在药水碰撞时应用锋利、力量和冲击附魔效果。
+ * Mixin PotionEntity，在药水碰撞时应用锋利、力量、冲击和火矢附魔效果。
  *
  * 锋利 (Sharpness) [药水]：
  * - 掷出的药水砸中实体时造成伤害
@@ -43,6 +43,13 @@ import java.util.List;
  *   entity.takeKnockback(punchLevel * 0.6, -normalizedVelX, -normalizedVelZ)
  * - 击退方向为药水飞行方向（水平分量归一化）
  * - 对溅射范围内的实体也施加击退（按距离衰减）
+ *
+ * 火矢 (Flame) [药水]：
+ * - 掷出的药水砸中实体时点燃目标
+ * - 参考MC 1.20.4弓火矢附魔规则：
+ *   直接命中的实体着火5秒（100 ticks）
+ *   溅射范围内的实体也会着火，时长按距离衰减
+ * - 火矢附魔只有1级（与原版一致）
  */
 @Mixin(PotionEntity.class)
 public abstract class PotionEntityMixin {
@@ -60,8 +67,9 @@ public abstract class PotionEntityMixin {
         int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, potionStack);
         int powerLevel = EnchantmentHelper.getLevel(Enchantments.POWER, potionStack);
         int punchLevel = EnchantmentHelper.getLevel(Enchantments.PUNCH, potionStack);
+        int flameLevel = EnchantmentHelper.getLevel(Enchantments.FLAME, potionStack);
 
-        if (sharpnessLevel <= 0 && powerLevel <= 0 && punchLevel <= 0) {
+        if (sharpnessLevel <= 0 && powerLevel <= 0 && punchLevel <= 0 && flameLevel <= 0) {
             return;
         }
 
@@ -76,8 +84,8 @@ public abstract class PotionEntityMixin {
         // 锋利与力量叠加
         float totalDamage = sharpnessDamage + powerDamage;
 
-        HelloMod.LOGGER.info("[PotionDamage] Potion hit! Sharpness level={} (dmg={}), Power level={} (dmg={}), Punch level={}, total dmg={}",
-                sharpnessLevel, sharpnessDamage, powerLevel, powerDamage, punchLevel, totalDamage);
+        HelloMod.LOGGER.info("[PotionDamage] Potion hit! Sharpness level={} (dmg={}), Power level={} (dmg={}), Punch level={}, Flame level={}, total dmg={}",
+                sharpnessLevel, sharpnessDamage, powerLevel, powerDamage, punchLevel, flameLevel, totalDamage);
 
         // 选择伤害源：如果两个附魔都有，优先使用力量的伤害源（伤害更高的那个）
         DamageSource damageSource = null;
@@ -101,9 +109,11 @@ public abstract class PotionEntityMixin {
             if (target instanceof LivingEntity livingTarget) {
                 // 造成伤害
                 if (totalDamage > 0 && damageSource != null) {
+                    HelloMod.LOGGER.info("[PotionDamage] Direct hit on entity: {}, health BEFORE={}/{}, damage={}",
+                            livingTarget.getName().getString(), livingTarget.getHealth(), livingTarget.getMaxHealth(), totalDamage);
                     livingTarget.damage(damageSource, totalDamage);
-                    HelloMod.LOGGER.info("[PotionDamage] Direct hit on entity: {}, damage={}",
-                            livingTarget.getName().getString(), totalDamage);
+                    HelloMod.LOGGER.info("[PotionDamage] Direct hit on entity: {}, health AFTER={}/{}",
+                            livingTarget.getName().getString(), livingTarget.getHealth(), livingTarget.getMaxHealth());
                 }
 
                 // 冲击击退：参考MC 1.20.4 AbstractArrowEntity.onHit 中的 Punch 逻辑
@@ -118,6 +128,14 @@ public abstract class PotionEntityMixin {
                     HelloMod.LOGGER.info("[PotionDamage] Punch knockback on entity: {}, strength={}, direction=({}, {})",
                             livingTarget.getName().getString(), knockbackStrength,
                             velocity.x / horizontalLength, velocity.z / horizontalLength);
+                }
+
+                // 火矢：参考MC 1.20.4弓火矢附魔规则
+                // 原版 Flame 附魔使箭矢点燃目标5秒（100 ticks）
+                if (flameLevel > 0) {
+                    livingTarget.setOnFireFor(5);
+                    HelloMod.LOGGER.info("[PotionDamage] Flame ignited entity: {} for 5 seconds (health: {}/{})",
+                            livingTarget.getName().getString(), livingTarget.getHealth(), livingTarget.getMaxHealth());
                 }
             }
         }
@@ -164,6 +182,17 @@ public abstract class PotionEntityMixin {
                         entity.takeKnockback(splashKnockbackStrength, -dx / splashHorizontalLength, -dz / splashHorizontalLength);
                         HelloMod.LOGGER.info("[PotionDamage] Splash punch knockback {} to entity: {} (distance: {})",
                                 splashKnockbackStrength, entity.getName().getString(), distance);
+                    }
+                }
+
+                // 溅射火矢（距离衰减）
+                // 溅射范围内的实体着火时长按距离衰减，最大5秒
+                if (flameLevel > 0) {
+                    int fireDuration = (int) Math.ceil(5 * factor);
+                    if (fireDuration > 0) {
+                        entity.setOnFireFor(fireDuration);
+                        HelloMod.LOGGER.info("[PotionDamage] Splash flame ignited entity: {} for {} seconds (distance: {}, health: {}/{})",
+                                entity.getName().getString(), fireDuration, distance, entity.getHealth(), entity.getMaxHealth());
                     }
                 }
             }
