@@ -14,7 +14,9 @@
         "SwiftThrowTickMixin",
         "MultishotEnchantmentMixin",
         "LivingEntityDamageCooldownMixin",
-        "PiercingPotionMixin"
+        "PiercingPotionMixin",
+        "LoyaltyPotionMixin",
+        "LoyaltyCollisionMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin",

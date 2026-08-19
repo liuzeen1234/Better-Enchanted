@@ -55,12 +55,13 @@ public abstract class PotionItemMixin {
         int multishotLevel = EnchantmentHelper.getLevel(Enchantments.MULTISHOT, stack);
         int quickChargeLevel = EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack);
         int piercingLevel = EnchantmentHelper.getLevel(Enchantments.PIERCING, stack);
+        int loyaltyLevel = EnchantmentHelper.getLevel(Enchantments.LOYALTY, stack);
 
         // 如果没有任何附魔，让原版逻辑处理
         if (sharpnessLevel <= 0 && unbreakingLevel <= 0 && powerLevel <= 0
                 && punchLevel <= 0 && flameLevel <= 0 && infinityLevel <= 0 && channelingLevel <= 0
                 && swiftThrowLevel <= 0 && multishotLevel <= 0 && quickChargeLevel <= 0
-                && piercingLevel <= 0) {
+                && piercingLevel <= 0 && loyaltyLevel <= 0) {
             return;
         }
 
@@ -78,8 +79,8 @@ public abstract class PotionItemMixin {
             return;
         }
 
-        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}, QuickCharge={}, Piercing={}",
-                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel, multishotLevel, quickChargeLevel, piercingLevel);
+        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}, QuickCharge={}, Piercing={}, Loyalty={}",
+                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel, multishotLevel, quickChargeLevel, piercingLevel, loyaltyLevel);
 
         if (!world.isClient()) {
             // 创建药水实体
@@ -326,7 +327,12 @@ public abstract class PotionItemMixin {
 
         // 消耗与冷却逻辑（仅服务端执行）
         if (!world.isClient() && !user.getAbilities().creativeMode) {
-            if (infinityLevel > 0) {
+            if (loyaltyLevel > 0) {
+                // 忠诚附魔：投掷时立即消耗药水（因为药水实体自身会返回并归还物品）
+                // 如果药水途中碰到东西就不会返回（正常消耗掉了）
+                stack.decrement(1);
+                HelloMod.LOGGER.info("[PotionDebug] Loyalty active! Potion consumed on throw (will return if not blocked).");
+            } else if (infinityLevel > 0) {
                 // 计算快速装填减少后的冷却时间
                 int cooldownTicks = InfinityCooldownManager.getReducedCooldown(quickChargeLevel);
 
