@@ -11,6 +11,8 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -26,6 +28,9 @@ public class HelloModClient implements ClientModInitializer {
     /** 手持物品显示是否开启 */
     private static boolean itemHudEnabled = true;
 
+    /** 高级物品显示是否开启（显示NBT标签和耐久度） */
+    private static boolean advancedItemHudEnabled = false;
+
     /** 打开调试菜单的按键，默认无绑定 */
     private static KeyBinding openDebugMenuKey;
 
@@ -35,6 +40,14 @@ public class HelloModClient implements ClientModInitializer {
 
     public static void toggleItemHud() {
         itemHudEnabled = !itemHudEnabled;
+    }
+
+    public static boolean isAdvancedItemHudEnabled() {
+        return advancedItemHudEnabled;
+    }
+
+    public static void toggleAdvancedItemHud() {
+        advancedItemHudEnabled = !advancedItemHudEnabled;
     }
 
     @Override
@@ -93,5 +106,38 @@ public class HelloModClient implements ClientModInitializer {
 
         String text = String.format("[Client] %s x%d", itemName, count);
         drawContext.drawText(textRenderer, text, 4, 4, 0x00FF00, true);
+
+        // 高级物品显示：NBT标签和耐久度
+        if (advancedItemHudEnabled) {
+            int yOffset = 16; // 从第一行下方开始
+
+            // 显示耐久度（如有）
+            if (mainHand.isDamageable()) {
+                int currentDurability = mainHand.getMaxDamage() - mainHand.getDamage();
+                int maxDurability = mainHand.getMaxDamage();
+                String durabilityText = String.format("(%d/%d)", currentDurability, maxDurability);
+                drawContext.drawText(textRenderer, durabilityText, 4, 4 + yOffset, 0xFFAA00, true);
+                yOffset += 12;
+            }
+
+            // 显示所有NBT标签
+            NbtCompound nbt = mainHand.getNbt();
+            if (nbt != null) {
+                for (String key : nbt.getKeys()) {
+                    NbtElement element = nbt.get(key);
+                    String nbtText = key + ": " + (element != null ? element.asString() : "null");
+                    // 超过80字符时换行显示
+                    int maxLineLength = 80;
+                    int startIndex = 0;
+                    while (startIndex < nbtText.length()) {
+                        int endIndex = Math.min(startIndex + maxLineLength, nbtText.length());
+                        String line = nbtText.substring(startIndex, endIndex);
+                        drawContext.drawText(textRenderer, line, 4, 4 + yOffset, 0xAAAAAA, true);
+                        yOffset += 12;
+                        startIndex = endIndex;
+                    }
+                }
+            }
+        }
     }
 }

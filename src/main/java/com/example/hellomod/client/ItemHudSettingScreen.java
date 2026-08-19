@@ -12,6 +12,7 @@ public class ItemHudSettingScreen extends Screen {
 
     private final Screen parent;
     private ButtonWidget toggleButton;
+    private ButtonWidget advancedToggleButton;
 
     public ItemHudSettingScreen(Screen parent) {
         super(Text.translatable("screen.hello-mod.item_hud_setting.title"));
@@ -33,12 +34,23 @@ public class ItemHudSettingScreen extends Screen {
 
         this.addDrawableChild(toggleButton);
 
+        // 高级物品显示开关按钮
+        advancedToggleButton = ButtonWidget.builder(getAdvancedToggleText(), button -> {
+            HelloModClient.toggleAdvancedItemHud();
+            button.setMessage(getAdvancedToggleText());
+        }).dimensions(centerX, centerY + 20, buttonWidth, buttonHeight).build();
 
+        this.addDrawableChild(advancedToggleButton);
     }
 
     private Text getToggleText() {
         String status = HelloModClient.isItemHudEnabled() ? "§a开启" : "§c关闭";
         return Text.translatable("screen.hello-mod.item_hud_setting.toggle", status);
+    }
+
+    private Text getAdvancedToggleText() {
+        String status = HelloModClient.isAdvancedItemHudEnabled() ? "§a开启" : "§c关闭";
+        return Text.literal("高级物品显示: " + status);
     }
 
     @Override
