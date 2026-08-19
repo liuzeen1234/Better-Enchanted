@@ -44,13 +44,17 @@ public class ItemHudSettingScreen extends Screen {
     }
 
     private Text getToggleText() {
-        String status = HelloModClient.isItemHudEnabled() ? "§a开启" : "§c关闭";
+        String status = HelloModClient.isItemHudEnabled()
+                ? "§a" + Text.translatable("screen.hello-mod.debug_log_setting.on").getString()
+                : "§c" + Text.translatable("screen.hello-mod.debug_log_setting.off").getString();
         return Text.translatable("screen.hello-mod.item_hud_setting.toggle", status);
     }
 
     private Text getAdvancedToggleText() {
-        String status = HelloModClient.isAdvancedItemHudEnabled() ? "§a开启" : "§c关闭";
-        return Text.literal("高级物品显示: " + status);
+        String status = HelloModClient.isAdvancedItemHudEnabled()
+                ? "§a" + Text.translatable("screen.hello-mod.debug_log_setting.on").getString()
+                : "§c" + Text.translatable("screen.hello-mod.debug_log_setting.off").getString();
+        return Text.translatable("screen.hello-mod.item_hud_setting.advanced_toggle", status);
     }
 
     @Override

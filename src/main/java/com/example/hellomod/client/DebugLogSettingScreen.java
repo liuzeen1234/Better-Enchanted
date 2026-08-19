@@ -113,7 +113,9 @@ public class DebugLogSettingScreen extends Screen {
     }
 
     private Text getToggleText(String label, boolean enabled) {
-        String status = enabled ? "§a开启" : "§c关闭";
+        String status = enabled
+                ? "§a" + Text.translatable("screen.hello-mod.debug_log_setting.on").getString()
+                : "§c" + Text.translatable("screen.hello-mod.debug_log_setting.off").getString();
         return Text.literal(label + ": " + status);
     }
 

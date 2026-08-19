@@ -37,7 +37,9 @@ public class HealthHudSettingScreen extends Screen {
     }
 
     private Text getToggleText() {
-        String status = EntityHealthHud.isEnabled() ? "§a开启" : "§c关闭";
+        String status = EntityHealthHud.isEnabled()
+                ? "§a" + Text.translatable("screen.hello-mod.debug_log_setting.on").getString()
+                : "§c" + Text.translatable("screen.hello-mod.debug_log_setting.off").getString();
         return Text.translatable("screen.hello-mod.health_hud_setting.toggle", status);
     }
 

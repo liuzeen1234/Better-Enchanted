@@ -8,10 +8,15 @@
   "screen.hello-mod.debug_menu.title": "Debug Menu",
   "screen.hello-mod.debug_menu.health_hud_entry": "Entity Health Display",
   "screen.hello-mod.debug_menu.item_hud_entry": "Held Item Display",
+  "screen.hello-mod.debug_menu.debug_log_entry": "Debug Log Toggle",
+  "screen.hello-mod.debug_log_setting.title": "Debug Log Settings",
+  "screen.hello-mod.debug_log_setting.on": "ON",
+  "screen.hello-mod.debug_log_setting.off": "OFF",
   "screen.hello-mod.health_hud_setting.title": "Entity Health Display Settings",
   "screen.hello-mod.health_hud_setting.toggle": "Display: %s",
   "screen.hello-mod.item_hud_setting.title": "Held Item Display Settings",
   "screen.hello-mod.item_hud_setting.toggle": "Display: %s",
+  "screen.hello-mod.item_hud_setting.advanced_toggle": "Advanced Item Display: %s",
   "screen.hello-mod.back": "Back",
   "enchantment.hello-mod.swift_throw": "Swift Throw"
 }
