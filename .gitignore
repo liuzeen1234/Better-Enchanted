@@ -13,3 +13,6 @@ run/
 # OS
 Thumbs.db
 .DS_Store
+
+# Docs
+VIDEO_SCRIPT.md
