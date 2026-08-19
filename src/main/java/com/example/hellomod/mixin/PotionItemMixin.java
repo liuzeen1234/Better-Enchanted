@@ -54,11 +54,13 @@ public abstract class PotionItemMixin {
         int swiftThrowLevel = EnchantmentHelper.getLevel(ModEnchantments.SWIFT_THROW, stack);
         int multishotLevel = EnchantmentHelper.getLevel(Enchantments.MULTISHOT, stack);
         int quickChargeLevel = EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack);
+        int piercingLevel = EnchantmentHelper.getLevel(Enchantments.PIERCING, stack);
 
         // 如果没有任何附魔，让原版逻辑处理
         if (sharpnessLevel <= 0 && unbreakingLevel <= 0 && powerLevel <= 0
                 && punchLevel <= 0 && flameLevel <= 0 && infinityLevel <= 0 && channelingLevel <= 0
-                && swiftThrowLevel <= 0 && multishotLevel <= 0 && quickChargeLevel <= 0) {
+                && swiftThrowLevel <= 0 && multishotLevel <= 0 && quickChargeLevel <= 0
+                && piercingLevel <= 0) {
             return;
         }
 
@@ -76,8 +78,8 @@ public abstract class PotionItemMixin {
             return;
         }
 
-        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}, QuickCharge={}",
-                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel, multishotLevel, quickChargeLevel);
+        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}, QuickCharge={}, Piercing={}",
+                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel, multishotLevel, quickChargeLevel, piercingLevel);
 
         if (!world.isClient()) {
             // 创建药水实体

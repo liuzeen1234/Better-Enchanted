@@ -13,7 +13,8 @@
         "PotionEntityMixin",
         "SwiftThrowTickMixin",
         "MultishotEnchantmentMixin",
-        "LivingEntityDamageCooldownMixin"
+        "LivingEntityDamageCooldownMixin",
+        "PiercingPotionMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin",
