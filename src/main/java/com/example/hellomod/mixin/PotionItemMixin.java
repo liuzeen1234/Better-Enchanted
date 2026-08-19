@@ -286,6 +286,19 @@ public abstract class PotionItemMixin {
 
                         extraPotion.setInvisible(true);
                         extraPotion.setNoGravity(true);
+
+                        // 为每个额外药水生成独立的粒子拖尾
+                        if (world instanceof ServerWorld serverWorld) {
+                            Vec3d particleStart = extraPotion.getPos();
+                            double particleRange = Math.min(actualSpeed * 2, 64.0);
+                            double step = 0.5;
+                            for (double d = 0; d < particleRange; d += step) {
+                                double px = particleStart.x + extraDirection.x * d;
+                                double py = particleStart.y + extraDirection.y * d;
+                                double pz = particleStart.z + extraDirection.z * d;
+                                serverWorld.spawnParticles(ParticleTypes.CRIT, px, py, pz, 1, 0, 0, 0, 0);
+                            }
+                        }
                     } else if (swiftThrowLevel > 0) {
                         // 迅投正常物理模式
                         Vec3d velocity = extraDirection.multiply(actualSpeed);
