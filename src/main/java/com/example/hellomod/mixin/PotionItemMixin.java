@@ -53,11 +53,12 @@ public abstract class PotionItemMixin {
         int channelingLevel = EnchantmentHelper.getLevel(Enchantments.CHANNELING, stack);
         int swiftThrowLevel = EnchantmentHelper.getLevel(ModEnchantments.SWIFT_THROW, stack);
         int multishotLevel = EnchantmentHelper.getLevel(Enchantments.MULTISHOT, stack);
+        int quickChargeLevel = EnchantmentHelper.getLevel(Enchantments.QUICK_CHARGE, stack);
 
         // 如果没有任何附魔，让原版逻辑处理
         if (sharpnessLevel <= 0 && unbreakingLevel <= 0 && powerLevel <= 0
                 && punchLevel <= 0 && flameLevel <= 0 && infinityLevel <= 0 && channelingLevel <= 0
-                && swiftThrowLevel <= 0 && multishotLevel <= 0) {
+                && swiftThrowLevel <= 0 && multishotLevel <= 0 && quickChargeLevel <= 0) {
             return;
         }
 
@@ -75,8 +76,8 @@ public abstract class PotionItemMixin {
             return;
         }
 
-        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}",
-                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel, multishotLevel);
+        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}, QuickCharge={}",
+                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel, multishotLevel, quickChargeLevel);
 
         if (!world.isClient()) {
             // 创建药水实体
@@ -324,16 +325,29 @@ public abstract class PotionItemMixin {
         // 消耗与冷却逻辑（仅服务端执行）
         if (!world.isClient() && !user.getAbilities().creativeMode) {
             if (infinityLevel > 0) {
+                // 计算快速装填减少后的冷却时间
+                int cooldownTicks = InfinityCooldownManager.getReducedCooldown(quickChargeLevel);
+
                 if (unbreakingLevel > 0) {
                     if (user.getRandom().nextInt(unbreakingLevel + 1) > 0) {
                         HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check PASSED, no cooldown.");
                     } else {
-                        InfinityCooldownManager.triggerCooldown(user);
-                        HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, 30s cooldown applied.");
+                        if (cooldownTicks > 0) {
+                            InfinityCooldownManager.triggerCooldown(user, cooldownTicks);
+                            HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, {}s cooldown applied (QuickCharge Lv{}).",
+                                    String.format("%.1f", cooldownTicks / 20.0f), quickChargeLevel);
+                        } else {
+                            HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, but QuickCharge Lv{} negates cooldown.", quickChargeLevel);
+                        }
                     }
                 } else {
-                    InfinityCooldownManager.triggerCooldown(user);
-                    HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: 30s cooldown applied.");
+                    if (cooldownTicks > 0) {
+                        InfinityCooldownManager.triggerCooldown(user, cooldownTicks);
+                        HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: {}s cooldown applied (QuickCharge Lv{}).",
+                                String.format("%.1f", cooldownTicks / 20.0f), quickChargeLevel);
+                    } else {
+                        HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: QuickCharge Lv{} negates cooldown.", quickChargeLevel);
+                    }
                 }
                 HelloMod.LOGGER.info("[PotionDebug] Infinity active! Potion NOT consumed.");
             } else if (unbreakingLevel > 0 && user.getRandom().nextInt(unbreakingLevel + 1) > 0) {

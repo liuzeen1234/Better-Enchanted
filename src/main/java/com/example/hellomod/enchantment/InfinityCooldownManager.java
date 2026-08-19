@@ -49,17 +49,53 @@ public class InfinityCooldownManager {
     }
 
     /**
-     * 触发无限附魔冷却，并同步到客户端。
+     * 触发无限附魔冷却（默认30秒），并同步到客户端。
      */
     public static void triggerCooldown(PlayerEntity player) {
-        cooldownMap.put(player.getUuid(), COOLDOWN_TICKS);
-        HelloMod.LOGGER.info("[InfinityCooldown] Cooldown triggered for player: {}, duration: {}ticks (30s)",
-                player.getName().getString(), COOLDOWN_TICKS);
+        triggerCooldown(player, COOLDOWN_TICKS);
+    }
+
+    /**
+     * 触发无限附魔冷却（自定义时长），并同步到客户端。
+     * 用于快速装填 (Quick Charge) 减少冷却时间。
+     *
+     * @param player 玩家
+     * @param cooldownTicks 冷却时间（ticks）
+     */
+    public static void triggerCooldown(PlayerEntity player, int cooldownTicks) {
+        if (cooldownTicks <= 0) {
+            // 冷却时间为0或负数时不触发冷却
+            HelloMod.LOGGER.info("[InfinityCooldown] Cooldown skipped for player: {} (duration=0)",
+                    player.getName().getString());
+            return;
+        }
+        cooldownMap.put(player.getUuid(), cooldownTicks);
+        HelloMod.LOGGER.info("[InfinityCooldown] Cooldown triggered for player: {}, duration: {}ticks ({}s)",
+                player.getName().getString(), cooldownTicks, String.format("%.1f", cooldownTicks / 20.0f));
 
         // 同步冷却状态到客户端（用于渲染冷却动画）
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            InfinityCooldownSync.sendCooldownToClient(serverPlayer, COOLDOWN_TICKS, COOLDOWN_TICKS);
+            InfinityCooldownSync.sendCooldownToClient(serverPlayer, cooldownTicks, cooldownTicks);
         }
+    }
+
+    /**
+     * 计算快速装填 (Quick Charge) 附魔减少后的冷却时间。
+     * 每级减少20%冷却时间：实际冷却 = 基础冷却 × (1 - 0.2 × level)
+     * Lv I = 24s(480t), Lv II = 18s(360t), Lv III = 12s(240t), Lv IV = 6s(120t), Lv V = 0s(0t)
+     *
+     * @param quickChargeLevel 快速装填附魔等级
+     * @return 减少后的冷却 ticks
+     */
+    public static int getReducedCooldown(int quickChargeLevel) {
+        if (quickChargeLevel <= 0) {
+            return COOLDOWN_TICKS;
+        }
+        double reduction = 1.0 - 0.2 * quickChargeLevel;
+        if (reduction <= 0) {
+            return 0;
+        }
+        return (int) (COOLDOWN_TICKS * reduction);
     }
 
     /**
