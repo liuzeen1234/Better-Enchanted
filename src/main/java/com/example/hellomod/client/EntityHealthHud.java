@@ -19,7 +19,7 @@ import net.minecraft.util.math.Vec3d;
 public class EntityHealthHud {
 
     private static boolean enabled = true;
-    private static final double REACH_DISTANCE = 128.0;
+    private static double reachDistance = 128.0;
 
     public static boolean isEnabled() {
         return enabled;
@@ -27,6 +27,14 @@ public class EntityHealthHud {
 
     public static void toggle() {
         enabled = !enabled;
+    }
+
+    public static double getReachDistance() {
+        return reachDistance;
+    }
+
+    public static void setReachDistance(double distance) {
+        reachDistance = distance;
     }
 
     public static void render(DrawContext drawContext, float tickDelta) {
@@ -65,11 +73,11 @@ public class EntityHealthHud {
 
         Vec3d cameraPos = client.cameraEntity.getCameraPosVec(1.0F);
         Vec3d lookVec = client.cameraEntity.getRotationVec(1.0F);
-        Vec3d reachEnd = cameraPos.add(lookVec.multiply(REACH_DISTANCE));
+        Vec3d reachEnd = cameraPos.add(lookVec.multiply(reachDistance));
 
         // 先检查方块碰撞距离，实体不应在方块后面被选中
-        HitResult blockHit = client.cameraEntity.raycast(REACH_DISTANCE, 1.0F, false);
-        double maxDist = REACH_DISTANCE;
+        HitResult blockHit = client.cameraEntity.raycast(reachDistance, 1.0F, false);
+        double maxDist = reachDistance;
         if (blockHit != null && blockHit.getType() != HitResult.Type.MISS) {
             maxDist = blockHit.getPos().distanceTo(cameraPos);
             reachEnd = cameraPos.add(lookVec.multiply(maxDist));

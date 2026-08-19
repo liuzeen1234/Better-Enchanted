@@ -14,6 +14,8 @@
   "screen.hello-mod.debug_log_setting.off": "关闭",
   "screen.hello-mod.health_hud_setting.title": "实体血量显示设置",
   "screen.hello-mod.health_hud_setting.toggle": "显示: %s",
+  "screen.hello-mod.health_hud_setting.reach_distance": "检测距离",
+  "screen.hello-mod.health_hud_setting.reach_distance_unit": "格",
   "screen.hello-mod.item_hud_setting.title": "手持物品显示设置",
   "screen.hello-mod.item_hud_setting.toggle": "显示: %s",
   "screen.hello-mod.item_hud_setting.advanced_toggle": "高级物品显示: %s",
