@@ -24,11 +24,11 @@ import java.util.function.Predicate;
 /**
  * 迅投附魔等级>20时的射线追踪传送逻辑。
  *
- * Mixin到ThrownEntity（PotionEntity的父类），在tick方法中：
  * 当药水带有 SwiftThrowRaycast NBT标记时，每tick执行：
  * 1. 计算本tick药水应飞过的距离（= SwiftThrowSpeed 格/tick）
  * 2. 从当前位置沿存储的方向做射线追踪
- * 3. 若命中方块或实体：传送药水到命中点，清除标记让原版碰撞逻辑生效
+ * 3. 若命中方块或实体：传送药水到命中点前方一小段距离，设置速度指向命中点，
+ *    清除标记，让下一帧原版tick自然检测碰撞并触发onCollision
  * 4. 若未命中：传送药水到射线末端，下tick继续
  */
 @Mixin(ThrownEntity.class)
@@ -99,35 +99,36 @@ public abstract class SwiftThrowTickMixin {
         }
 
         if (closestHit != null && closestHit.getType() != HitResult.Type.MISS) {
-            // 命中！传送药水到命中点，清除射线追踪标记
+            // 命中！
             Vec3d hitPos = closestHit.getPos();
-            self.setPosition(hitPos);
 
-            // 清除射线追踪标记使其回归正常行为
+            // 清除射线追踪标记，下一tick恢复正常物理行为
             potionNbt.remove("SwiftThrowRaycast");
             potionNbt.remove("SwiftThrowSpeed");
             potionNbt.remove("SwiftThrowDirX");
             potionNbt.remove("SwiftThrowDirY");
             potionNbt.remove("SwiftThrowDirZ");
 
-            // 设置速度为方向上的微小值，触发原版碰撞检测
-            self.setVelocity(direction.multiply(0.1));
+            // 将药水传送到命中点前方0.5格的位置
+            // 设置速度朝命中点方向，速度设为1.0让原版tick在下一帧检测到碰撞
+            Vec3d preHitPos = hitPos.subtract(direction.multiply(0.5));
+            self.setPosition(preHitPos);
+            self.setVelocity(direction.multiply(1.0));
+            // 恢复重力让药水正常落下（如果没命中方块的话）
+            self.setNoGravity(false);
 
-            HelloMod.LOGGER.info("[SwiftThrow Raycast] HIT at ({}, {}, {}), type={}",
-                    hitPos.x, hitPos.y, hitPos.z, closestHit.getType());
+            HelloMod.LOGGER.info("[SwiftThrow Raycast] HIT! Positioned at ({}, {}, {}), target=({}, {}, {}), type={}",
+                    preHitPos.x, preHitPos.y, preHitPos.z, hitPos.x, hitPos.y, hitPos.z, closestHit.getType());
 
-            // 不取消tick，让原版tick处理碰撞事件
+            // 取消本次tick，下一tick原版逻辑会自然处理碰撞
+            ci.cancel();
         } else {
             // 未命中：传送到射线末端
             self.setPosition(endPos);
-            // 保持微小速度避免实体被移除（0 tick速度的投射物可能被清理）
-            self.setVelocity(direction.multiply(0.01));
+            self.setVelocity(Vec3d.ZERO);
 
-            HelloMod.LOGGER.info("[SwiftThrow Raycast] No hit, teleported to ({}, {}, {})",
-                    endPos.x, endPos.y, endPos.z);
-
-            // 取消原版tick的位移逻辑，因为我们自己处理了
-            // 不取消，因为需要age计数等生命周期处理
+            // 取消原版tick
+            ci.cancel();
         }
     }
 

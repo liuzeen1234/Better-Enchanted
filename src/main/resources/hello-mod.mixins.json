@@ -14,7 +14,8 @@
         "SwiftThrowTickMixin"
     ],
     "client": [
-        "client.DrawContextCooldownMixin"
+        "client.DrawContextCooldownMixin",
+        "client.SwiftThrowRenderMixin"
     ],
     "injectors": {
         "defaultRequire": 1

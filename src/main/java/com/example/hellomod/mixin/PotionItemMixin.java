@@ -13,6 +13,8 @@ import net.minecraft.item.LingeringPotionItem;
 import net.minecraft.item.SplashPotionItem;
 import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
@@ -129,6 +131,23 @@ public abstract class PotionItemMixin {
                 potionNbt.putDouble("SwiftThrowDirX", direction.x);
                 potionNbt.putDouble("SwiftThrowDirY", direction.y);
                 potionNbt.putDouble("SwiftThrowDirZ", direction.z);
+
+                // 隐藏药水实体（射线追踪模式不显示药水瓶）
+                potionEntity.setInvisible(true);
+                potionEntity.setNoGravity(true);
+
+                // 生成暴击粒子弹道：沿发射方向每隔0.5格生成一个crit粒子
+                if (world instanceof ServerWorld serverWorld) {
+                    Vec3d particleStart = potionEntity.getPos();
+                    double particleRange = Math.min(actualSpeed * 2, 64.0); // 最远64格粒子
+                    double step = 0.5;
+                    for (double d = 0; d < particleRange; d += step) {
+                        double px = particleStart.x + direction.x * d;
+                        double py = particleStart.y + direction.y * d;
+                        double pz = particleStart.z + direction.z * d;
+                        serverWorld.spawnParticles(ParticleTypes.CRIT, px, py, pz, 1, 0, 0, 0, 0);
+                    }
+                }
 
                 HelloMod.LOGGER.info("[SwiftThrow] Raycast mode! Level={}, speed={}, direction=({}, {}, {})",
                         swiftThrowLevel, actualSpeed, direction.x, direction.y, direction.z);
