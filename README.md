@@ -5,17 +5,17 @@
 
 ---
 
-## 模组简介
+## 简介
 
 **Better Enchanted** 是一个 Minecraft Fabric 模组，核心玩法是将原版武器、弓、弩、三叉戟等装备的附魔效果创造性地应用到食物和投掷药水上。食物附魔在食用时对食用者生效，药水附魔在投掷命中时对目标生效。所有效果的数值公式尽可能参考 MC 1.20.4 原版附魔机制，确保平衡性和一致性。
 
 ---
 
-## 一、食物类附魔
+## 一、食物附魔
 
 食物附魔对所有可食用物品生效，同时兼容蛋糕方块（蛋糕使用专门的方块附魔存储系统）。
 
-### 1.1 锋利 (Sharpness)
+### 1.1 锋利
 
 - **效果**：食用时对食用者造成伤害
 - **公式**：`damage = 0.5 × level + 0.5`
@@ -23,7 +23,7 @@
 - **自定义伤害源**：拥有独立的死亡消息（"XXX had their throat cut by sharp food"）
 - **蛋糕支持**：通过 CakeEnchantmentStorage 读取蛋糕位置的锋利等级
 
-### 1.2 击退 (Knockback)
+### 1.2 击退
 
 - **效果**：食用时对食用者施加击退
 - **方向**：随机方向（360°随机角度），模拟被食物"弹飞"的效果
@@ -32,21 +32,21 @@
   - 竖直方向：若在地面上则给予一个小跳跃（最大0.4）
 - **参考**：改编自 MC 1.20.4 `PlayerEntity.attack()` 中的击退逻辑
 
-### 1.3 火焰附加 (Fire Aspect)
+### 1.3 火焰附加
 
 - **效果**：食用时点燃食用者
 - **时长**：`level × 4` 秒
   - 火焰附加 I = 4秒，火焰附加 II = 8秒
 - **参考**：与 MC 1.20.4 原版火焰附加逻辑完全一致（`target.setOnFireFor(level * 4)`）
 
-### 1.4 效率 (Efficiency)
+### 1.4 效率
 
 - **效果**：加快食用速度
 - **公式**：每级减少10%进食时间
   - 效率 I = 加速10%，效率 V = 加速50%
 - **实现**：通过 Mixin `Item.getMaxUseTime()` 减少食用 tick 数
 
-### 1.5 冰霜行者 (Frost Walker)
+### 1.5 冰霜行者
 
 - **效果**：进食后获得冰霜行者效果
 - **时长**：基础20秒 + 每级额外10秒
@@ -57,7 +57,7 @@
 - **视觉效果**：血条显示为蓝色冰冻样式
 - **可配置**：可通过调试菜单开关冰霜行者日志
 
-### 1.6 耐久 (Unbreaking)
+### 1.6 耐久
 
 - **效果**：食用后有概率不消耗食物
 - **概率公式**：参考 MC 1.20.4 原版耐久公式
@@ -68,11 +68,11 @@
 
 ---
 
-## 二、药水类附魔 — 武器/弓系
+## 二、药水附魔 — 武器/弓
 
 药水附魔在投掷型药水（喷溅药水/滞留药水）被掷出并命中时触发。所有伤害/效果对直接命中的实体全额生效，对溅射范围（4格）内的实体按距离衰减生效。
 
-### 2.1 锋利 (Sharpness) [药水]
+### 2.1 锋利
 
 - **效果**：掷出的药水砸中实体造成伤害
 - **公式**：`damage = 0.5 × level + 0.5`（与食物锋利一致）
@@ -80,7 +80,7 @@
 - **叠加**：与力量附魔的伤害叠加生效
 - **自定义伤害源**：独立死亡消息（"XXX was shattered by a sharp potion"）
 
-### 2.2 力量 (Power) [药水]
+### 2.2 力量
 
 - **效果**：掷出的药水砸中实体造成伤害
 - **公式**：参考 MC 1.20.4 弓的 Power 附魔
@@ -89,7 +89,7 @@
 - **叠加**：与锋利附魔伤害直接相加
 - **伤害源**：当力量伤害≥锋利伤害时，使用力量专属死亡消息（"XXX was obliterated by a powerful potion"）
 
-### 2.3 冲击 (Punch) [药水]
+### 2.3 冲击
 
 - **效果**：掷出的药水砸中实体造成击退
 - **公式**：参考 MC 1.20.4 弓冲击附魔（`AbstractArrowEntity.onHit`）
@@ -98,14 +98,14 @@
   - 直接命中：沿药水飞行方向（水平分量归一化）击退
   - 溅射范围：从药水落点指向实体的方向击退，强度按距离衰减
 
-### 2.4 火矢 (Flame) [药水]
+### 2.4 火矢
 
 - **效果**：掷出的药水砸中实体时点燃目标
 - **直接命中**：着火5秒（100 ticks），与 MC 1.20.4 弓火矢规则一致
 - **溅射范围**：着火时长按距离衰减（`5 × (1 - distance/4)` 秒，向上取整）
 - **等级**：仅1级（与原版一致）
 
-### 2.5 引雷 (Channeling) [药水]
+### 2.5 引雷
 
 - **效果**：基于 MC 1.20.4 三叉戟引雷规则改良为 AOE 版本
 - **条件**：
@@ -118,9 +118,9 @@
 
 ---
 
-## 三、药水类附魔 — 弩系
+## 三、药水附魔 — 弩
 
-### 3.1 多重射击 (Multishot) [药水]
+### 3.1 多重射击
 
 - **效果**：一次投掷产生多瓶药水，以圆锥散布
 - **数量公式**：总投掷物 = `2 + level`
@@ -132,14 +132,14 @@
 - **消耗**：只消耗1瓶
 - **兼容性**：完全兼容迅投附魔的所有模式（物理投掷/射线追踪）
 
-### 3.2 快速装填 (Quick Charge) [药水]
+### 3.2 快速装填
 
 - **效果**：减少无限附魔的冷却时间
 - **公式**：每级减少20%冷却时间（基础30秒）
   - Lv I = 24秒，Lv II = 18秒，Lv III = 12秒，Lv IV = 6秒，Lv V = 0秒（无冷却）
 - **前提**：需配合无限附魔使用，单独使用无效果
 
-### 3.3 穿透 (Piercing) [药水]
+### 3.3 穿透
 
 - **效果**：参考 MC 1.20.4 弩穿透规则
 - **机制**：
@@ -150,9 +150,9 @@
 
 ---
 
-## 四、药水类附魔 — 三叉戟系
+## 四、药水附魔 — 三叉戟
 
-### 4.1 忠诚 (Loyalty) [药水]
+### 4.1 忠诚
 
 - **效果**：参考 MC 1.20.4 三叉戟忠诚规则改编
 - **机制**：
@@ -167,7 +167,7 @@
 
 ## 五、药水通用附魔
 
-### 5.1 无限 (Infinity) [药水]
+### 5.1 无限
 
 - **效果**：投掷药水不消耗
 - **冷却系统**：
@@ -180,7 +180,7 @@
 - **客户端表现**：通过网络同步显示灰色半透明冷却动画覆盖
 - **冷却中拦截**：冷却期间无法再次使用该物品
 
-### 5.2 耐久 (Unbreaking) [药水]
+### 5.2 耐久
 
 - **效果**：投掷后有概率不消耗药水
 - **公式**：与食物耐久一致（消耗概率 = `1/(level+1)`）
@@ -190,7 +190,7 @@
 
 ## 六、自定义附魔
 
-### 6.1 迅投 (Swift Throw)
+### 6.1 迅投
 
 - **效果**：提升药水投掷速度和弹道平直度
 - **速度公式**：`实际初速度 = 原始初速度(0.5) × (1 + 0.5 × level)`
@@ -198,7 +198,7 @@
   - 等级越高，弹道越接近平射
   - 偏移角度<1°时直接设为0（完全平射）
 - **两种模式**：
-  - **等级 1-20（物理投掷模式）**：正常物理投掷，速度和方向按公式计算，受重力影响
+  - **等级 1-20（物理模式）**：正常物理投掷，速度和方向按公式计算，受重力影响
   - **等级 >20（射线追踪模式）**：瞬间命中，通过 NBT 标记让投射物每 tick 做射线追踪传送；隐藏药水实体，无重力；沿发射方向每0.5格生成暴击粒子（最远64格）
 - **兼容性**：与多重射击完全兼容，额外投掷物也使用相同的迅投模式
 
@@ -206,13 +206,13 @@
 
 ## 七、辅助功能
 
-### 7.1 实体血量 HUD
+### 7.1 实体血量HUD
 
 - 准星对准实体时在屏幕上显示目标的当前血量 / 最大血量
 - 检测距离可配置（默认128格）
 - 可通过调试菜单独立开关
 
-### 7.2 手持物品 HUD
+### 7.2 物品HUD
 
 - 屏幕左上角显示主手物品名称和数量
 - **高级模式**：额外显示物品耐久度和完整 NBT 标签数据
@@ -236,7 +236,7 @@
 
 ## 八、技术架构
 
-### 8.1 核心技术栈
+### 8.1 技术栈
 
 | 组件 | 技术选型 |
 |------|----------|
@@ -247,98 +247,98 @@
 | 代码修改 | Mixin 注入 |
 | 映射表 | Yarn 1.20.4+build.3:v2 |
 
-### 8.2 Mixin 注入点
+### 8.2 Mixin注入点
 
 | Mixin 类 | 目标 | 用途 |
 |-----------|------|------|
-| PlayerEatFoodMixin | `PlayerEntity.eatFood()` | 食物附魔效果触发（锋利/击退/火焰/冰霜） |
+| PlayerEatFoodMixin | `PlayerEntity.eatFood()` | 食物附魔效果触发 |
 | CakeBlockMixin | `CakeBlock.tryEat()` | 蛋糕附魔效果触发 |
-| CakePlaceMixin | `CakeBlock.onPlaced()` | 放置蛋糕时存储附魔数据 |
-| EfficientEatingMixin | `Item.getMaxUseTime()` | 效率附魔加速食用 |
+| CakePlaceMixin | `CakeBlock.onPlaced()` | 放置蛋糕时存储附魔 |
+| EfficientEatingMixin | `Item.getMaxUseTime()` | 效率加速食用 |
 | UnbreakingFoodMixin | `PlayerEntity.eatFood()` RETURN | 食物耐久判定 |
-| PotionItemMixin | `ThrowablePotionItem.use()` | 药水投掷逻辑（无限/耐久/多重射击/消耗） |
-| PotionEntityMixin | `PotionEntity.onCollision()` | 药水命中效果（锋利/力量/冲击/火矢/引雷） |
-| SwiftThrowTickMixin | `PotionEntity.tick()` | 迅投射线追踪模式 |
+| PotionItemMixin | `ThrowablePotionItem.use()` | 药水投掷逻辑 |
+| PotionEntityMixin | `PotionEntity.onCollision()` | 药水命中效果 |
+| SwiftThrowTickMixin | `PotionEntity.tick()` | 迅投射线追踪 |
 | MultishotEnchantmentMixin | — | 多重射击辅助 |
 | PiercingPotionMixin | `PotionEntity` 碰撞 | 穿透逻辑 |
 | LoyaltyPotionMixin | `PotionEntity.tick()` | 忠诚返回逻辑 |
-| LoyaltyCollisionMixin | `PotionEntity` 碰撞 | 忠诚返回途中碰撞处理 |
-| LivingEntityDamageCooldownMixin | `LivingEntity` | 伤害无敌帧调整 |
+| LoyaltyCollisionMixin | `PotionEntity` 碰撞 | 忠诚碰撞处理 |
+| LivingEntityDamageCooldownMixin | `LivingEntity` | 无敌帧调整 |
 
 ### 8.3 包结构
 
 ```
 com.example.hellomod
-├── HelloMod.java                    # 主入口，注册事件和系统
+├── HelloMod.java                    # 主入口
 ├── block/                           # 蛋糕附魔存储、方块实体
-│   ├── CakeEnchantmentStorage.java  # 内存中的蛋糕附魔数据管理
+│   ├── CakeEnchantmentStorage.java
 │   ├── EnchantedCakeBlockEntity.java
 │   └── HelloModBlockEntities.java
 ├── client/                          # 客户端功能
-│   ├── HelloModClient.java          # 客户端入口
-│   ├── EntityHealthHud.java         # 实体血量HUD
-│   ├── InfinityCooldownClientState.java # 无限冷却客户端同步
-│   ├── DebugMenuScreen.java         # 调试菜单界面
-│   ├── DebugLogSettingScreen.java   # 日志开关界面
-│   ├── HealthHudSettingScreen.java  # 血量HUD设置界面
-│   └── ItemHudSettingScreen.java    # 物品HUD设置界面
-├── config/                          # 配置持久化
+│   ├── HelloModClient.java
+│   ├── EntityHealthHud.java
+│   ├── InfinityCooldownClientState.java
+│   ├── DebugMenuScreen.java
+│   ├── DebugLogSettingScreen.java
+│   ├── HealthHudSettingScreen.java
+│   └── ItemHudSettingScreen.java
+├── config/
 │   └── ModConfig.java
 ├── damage/                          # 自定义伤害源
 │   ├── ModDamageTypes.java
 │   ├── SharpFoodDamageSource.java
 │   ├── SharpPotionDamageSource.java
 │   └── PowerPotionDamageSource.java
-├── debug/                           # 调试日志控制
+├── debug/
 │   └── DebugLogConfig.java
-├── effect/                          # 自定义效果
-│   └── FrostWalkerFoodEffect.java   # 冰霜行者食物效果（tick事件）
+├── effect/
+│   └── FrostWalkerFoodEffect.java
 ├── enchantment/                     # 附魔系统
-│   ├── ModEnchantments.java         # 自定义附魔注册
-│   ├── SwiftThrowEnchantment.java   # 迅投附魔定义
-│   ├── InfinityCooldownManager.java # 无限冷却服务端管理
-│   └── InfinityCooldownSync.java    # 冷却状态网络同步
-└── mixin/                           # 所有Mixin注入类
-    ├── client/                      # 客户端Mixin
-    └── ...                          # 见上表
+│   ├── ModEnchantments.java
+│   ├── SwiftThrowEnchantment.java
+│   ├── InfinityCooldownManager.java
+│   └── InfinityCooldownSync.java
+└── mixin/                           # Mixin注入类
+    ├── client/
+    └── ...
 ```
 
-### 8.4 关键设计决策
+### 8.4 设计决策
 
-1. **蛋糕特殊处理**：蛋糕是方块而非物品，无法直接读取 ItemStack NBT。采用 `CakeEnchantmentStorage` 将附魔数据绑定到方块坐标，放置时写入、吃完时清除。
+1. **蛋糕处理**：蛋糕是方块而非物品，无法直接读取 ItemStack NBT。采用 `CakeEnchantmentStorage` 将附魔数据绑定到方块坐标，放置时写入、吃完时清除。
 
-2. **药水附魔数据传递**：附魔存储在药水 ItemStack 的 NBT 中，投掷时通过 `potionEntity.setItem(stack)` 将完整 ItemStack 传递给投射物实体，命中时通过 `EnchantmentHelper.getLevel()` 从实体的 stack 中读取。
+2. **药水数据传递**：附魔存储在药水 ItemStack 的 NBT 中，投掷时通过 `potionEntity.setItem(stack)` 传递给投射物实体，命中时通过 `EnchantmentHelper.getLevel()` 读取。
 
-3. **无限冷却系统**：不使用原版 `ItemCooldownManager`（会影响同类所有物品），而是自定义基于玩家 UUID 的冷却管理器 + NBT 标记（`InfinityMarked`），仅影响带标记的特定物品。
+3. **无限冷却**：不使用原版 `ItemCooldownManager`（会影响同类所有物品），而是自定义基于玩家 UUID 的冷却管理器 + NBT 标记，仅影响带标记的特定物品。
 
 4. **迅投射线追踪**：高等级迅投（>20）时物理投掷速度过快会导致穿墙/碰撞检测失效，改为在 tick 中做逐步射线追踪传送，确保碰撞判定正确。
 
 ---
 
-## 九、附魔效果一览表
+## 九、附魔一览
 
 | 附魔 | 食物 | 药水 | 最高等级 | 备注 |
 |------|:----:|:----:|:--------:|------|
-| 锋利 (Sharpness) | ✅ | ✅ | V | 食物伤食用者，药水伤目标 |
-| 击退 (Knockback) | ✅ | — | II | 随机方向 |
-| 火焰附加 (Fire Aspect) | ✅ | — | II | 每级4秒 |
-| 效率 (Efficiency) | ✅ | — | V | 每级-10%进食时间 |
-| 冰霜行者 (Frost Walker) | ✅ | — | III | 结冰+持续伤害 |
-| 耐久 (Unbreaking) | ✅ | ✅ | III | 概率不消耗 |
-| 力量 (Power) | — | ✅ | V | 与锋利叠加 |
-| 冲击 (Punch) | — | ✅ | II | 沿飞行方向击退 |
-| 火矢 (Flame) | — | ✅ | I | 着火5秒 |
-| 无限 (Infinity) | — | ✅ | I | 不消耗+冷却 |
-| 引雷 (Channeling) | — | ✅ | I | 雷暴AOE闪电 |
-| 多重射击 (Multishot) | — | ✅ | III+ | 圆锥散布 |
-| 快速装填 (Quick Charge) | — | ✅ | V | 减少无限冷却 |
-| 穿透 (Piercing) | — | ✅ | IV | 穿过多个实体 |
-| 忠诚 (Loyalty) | — | ✅ | III | 2秒后返回 |
-| 迅投 (Swift Throw) | — | ✅ | ∞ | 自定义附魔 |
+| 锋利 | ✅ | ✅ | V | 食物伤食用者，药水伤目标 |
+| 击退 | ✅ | — | II | 随机方向 |
+| 火焰附加 | ✅ | — | II | 每级4秒 |
+| 效率 | ✅ | — | V | 每级-10%进食时间 |
+| 冰霜行者 | ✅ | — | III | 结冰+持续伤害 |
+| 耐久 | ✅ | ✅ | III | 概率不消耗 |
+| 力量 | — | ✅ | V | 与锋利叠加 |
+| 冲击 | — | ✅ | II | 沿飞行方向击退 |
+| 火矢 | — | ✅ | I | 着火5秒 |
+| 无限 | — | ✅ | I | 不消耗+冷却 |
+| 引雷 | — | ✅ | I | 雷暴AOE闪电 |
+| 多重射击 | — | ✅ | III+ | 圆锥散布 |
+| 快速装填 | — | ✅ | V | 减少无限冷却 |
+| 穿透 | — | ✅ | IV | 穿过多个实体 |
+| 忠诚 | — | ✅ | III | 2秒后返回 |
+| 迅投 | — | ✅ | ∞ | 自定义附魔 |
 
 ---
 
-## 十、运行环境与依赖
+## 十、环境与依赖
 
 - **Minecraft**：1.20.4
 - **Fabric Loader**：≥ 0.15.0
