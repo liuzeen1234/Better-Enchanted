@@ -32,8 +32,8 @@ public class InfinityCooldownManager {
     /** NBT 标记 key */
     public static final String INFINITY_MARKED_KEY = "InfinityMarked";
 
-    /** 冷却时间：10秒 = 200 ticks */
-    public static final int COOLDOWN_TICKS = 200;
+    /** 冷却时间：30秒 = 600 ticks */
+    public static final int COOLDOWN_TICKS = 600;
 
     /** 玩家 UUID -> 剩余冷却 ticks */
     private static final Map<UUID, Integer> cooldownMap = new ConcurrentHashMap<>();
@@ -53,7 +53,7 @@ public class InfinityCooldownManager {
      */
     public static void triggerCooldown(PlayerEntity player) {
         cooldownMap.put(player.getUuid(), COOLDOWN_TICKS);
-        HelloMod.LOGGER.info("[InfinityCooldown] Cooldown triggered for player: {}, duration: {}ticks (10s)",
+        HelloMod.LOGGER.info("[InfinityCooldown] Cooldown triggered for player: {}, duration: {}ticks (30s)",
                 player.getName().getString(), COOLDOWN_TICKS);
 
         // 同步冷却状态到客户端（用于渲染冷却动画）

@@ -329,11 +329,11 @@ public abstract class PotionItemMixin {
                         HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check PASSED, no cooldown.");
                     } else {
                         InfinityCooldownManager.triggerCooldown(user);
-                        HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, 10s cooldown applied.");
+                        HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, 30s cooldown applied.");
                     }
                 } else {
                     InfinityCooldownManager.triggerCooldown(user);
-                    HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: 10s cooldown applied.");
+                    HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: 30s cooldown applied.");
                 }
                 HelloMod.LOGGER.info("[PotionDebug] Infinity active! Potion NOT consumed.");
             } else if (unbreakingLevel > 0 && user.getRandom().nextInt(unbreakingLevel + 1) > 0) {
