@@ -1,5 +1,6 @@
 package com.example.hellomod.client;
 
+import com.example.hellomod.config.ModConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -18,27 +19,24 @@ import net.minecraft.util.math.Vec3d;
  */
 public class EntityHealthHud {
 
-    private static boolean enabled = true;
-    private static double reachDistance = 128.0;
-
     public static boolean isEnabled() {
-        return enabled;
+        return ModConfig.isEntityHealthHudEnabled();
     }
 
     public static void toggle() {
-        enabled = !enabled;
+        ModConfig.setEntityHealthHudEnabled(!ModConfig.isEntityHealthHudEnabled());
     }
 
     public static double getReachDistance() {
-        return reachDistance;
+        return ModConfig.getEntityHealthHudReachDistance();
     }
 
     public static void setReachDistance(double distance) {
-        reachDistance = distance;
+        ModConfig.setEntityHealthHudReachDistance(distance);
     }
 
     public static void render(DrawContext drawContext, float tickDelta) {
-        if (!enabled) return;
+        if (!isEnabled()) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) return;
@@ -71,13 +69,14 @@ public class EntityHealthHud {
     private static LivingEntity getTargetedEntity(MinecraftClient client) {
         if (client.cameraEntity == null) return null;
 
+        double reach = getReachDistance();
         Vec3d cameraPos = client.cameraEntity.getCameraPosVec(1.0F);
         Vec3d lookVec = client.cameraEntity.getRotationVec(1.0F);
-        Vec3d reachEnd = cameraPos.add(lookVec.multiply(reachDistance));
+        Vec3d reachEnd = cameraPos.add(lookVec.multiply(reach));
 
         // 先检查方块碰撞距离，实体不应在方块后面被选中
-        HitResult blockHit = client.cameraEntity.raycast(reachDistance, 1.0F, false);
-        double maxDist = reachDistance;
+        HitResult blockHit = client.cameraEntity.raycast(reach, 1.0F, false);
+        double maxDist = reach;
         if (blockHit != null && blockHit.getType() != HitResult.Type.MISS) {
             maxDist = blockHit.getPos().distanceTo(cameraPos);
             reachEnd = cameraPos.add(lookVec.multiply(maxDist));

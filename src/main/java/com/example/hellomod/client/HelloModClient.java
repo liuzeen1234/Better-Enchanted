@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import com.example.hellomod.config.ModConfig;
 import com.example.hellomod.debug.DebugLogConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -25,33 +26,30 @@ public class HelloModClient implements ClientModInitializer {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("BetterEnchanted");
     private int lastCount = -1;
 
-    /** 手持物品显示是否开启 */
-    private static boolean itemHudEnabled = true;
-
-    /** 高级物品显示是否开启（显示NBT标签和耐久度） */
-    private static boolean advancedItemHudEnabled = false;
-
     /** 打开调试菜单的按键，默认无绑定 */
     private static KeyBinding openDebugMenuKey;
 
     public static boolean isItemHudEnabled() {
-        return itemHudEnabled;
+        return ModConfig.isItemHudEnabled();
     }
 
     public static void toggleItemHud() {
-        itemHudEnabled = !itemHudEnabled;
+        ModConfig.setItemHudEnabled(!ModConfig.isItemHudEnabled());
     }
 
     public static boolean isAdvancedItemHudEnabled() {
-        return advancedItemHudEnabled;
+        return ModConfig.isAdvancedItemHudEnabled();
     }
 
     public static void toggleAdvancedItemHud() {
-        advancedItemHudEnabled = !advancedItemHudEnabled;
+        ModConfig.setAdvancedItemHudEnabled(!ModConfig.isAdvancedItemHudEnabled());
     }
 
     @Override
     public void onInitializeClient() {
+        // 加载持久化配置
+        ModConfig.load();
+
         // 注册无限附魔冷却客户端同步
         InfinityCooldownClientState.register();
 
@@ -81,7 +79,7 @@ public class HelloModClient implements ClientModInitializer {
     }
 
     private void renderItemCountHud(DrawContext drawContext) {
-        if (!itemHudEnabled) return;
+        if (!isItemHudEnabled()) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
@@ -108,7 +106,7 @@ public class HelloModClient implements ClientModInitializer {
         drawContext.drawText(textRenderer, text, 4, 4, 0x00FF00, true);
 
         // 高级物品显示：NBT标签和耐久度
-        if (advancedItemHudEnabled) {
+        if (isAdvancedItemHudEnabled()) {
             int yOffset = 16; // 从第一行下方开始
 
             // 显示耐久度（如有）

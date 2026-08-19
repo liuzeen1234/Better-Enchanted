@@ -1,111 +1,87 @@
 package com.example.hellomod.debug;
 
+import com.example.hellomod.config.ModConfig;
+
 /**
  * 调试日志开关配置。
- * 控制9种调试日志的输出开关，运行时生效，默认全部开启。
+ * 控制9种调试日志的输出开关，运行时生效，默认全部关闭。
+ * 所有状态委托给 ModConfig 进行持久化存储。
  */
 public class DebugLogConfig {
-
-    /** [CakeDebug] 蛋糕食用调试 */
-    private static boolean cakeDebugEnabled = true;
-
-    /** [PlaceDebug] 蛋糕放置调试 */
-    private static boolean placeDebugEnabled = true;
-
-    /** [FoodDebug] 普通食物食用调试 */
-    private static boolean foodDebugEnabled = true;
-
-    /** [PotionDebug] 药水投掷调试 */
-    private static boolean potionDebugEnabled = true;
-
-    /** [PotionDamage] 药水伤害调试 */
-    private static boolean potionDamageEnabled = true;
-
-    /** [SwiftThrow] 迅投附魔调试 */
-    private static boolean swiftThrowEnabled = true;
-
-    /** [ClientDebug] 客户端手持物品调试 */
-    private static boolean clientDebugEnabled = true;
-
-    /** [FrostWalker] 冰霜行者效果调试 */
-    private static boolean frostWalkerEnabled = true;
-
-    /** [InfinityCooldown] 无限附魔冷却调试 */
-    private static boolean infinityCooldownEnabled = true;
 
     // ========== Getters ==========
 
     public static boolean isCakeDebugEnabled() {
-        return cakeDebugEnabled;
+        return ModConfig.isCakeDebugEnabled();
     }
 
     public static boolean isPlaceDebugEnabled() {
-        return placeDebugEnabled;
+        return ModConfig.isPlaceDebugEnabled();
     }
 
     public static boolean isFoodDebugEnabled() {
-        return foodDebugEnabled;
+        return ModConfig.isFoodDebugEnabled();
     }
 
     public static boolean isPotionDebugEnabled() {
-        return potionDebugEnabled;
+        return ModConfig.isPotionDebugEnabled();
     }
 
     public static boolean isPotionDamageEnabled() {
-        return potionDamageEnabled;
+        return ModConfig.isPotionDamageEnabled();
     }
 
     public static boolean isSwiftThrowEnabled() {
-        return swiftThrowEnabled;
+        return ModConfig.isSwiftThrowEnabled();
     }
 
     public static boolean isClientDebugEnabled() {
-        return clientDebugEnabled;
+        return ModConfig.isClientDebugEnabled();
     }
 
     public static boolean isFrostWalkerEnabled() {
-        return frostWalkerEnabled;
+        return ModConfig.isFrostWalkerEnabled();
     }
 
     public static boolean isInfinityCooldownEnabled() {
-        return infinityCooldownEnabled;
+        return ModConfig.isInfinityCooldownEnabled();
     }
 
     // ========== Toggles ==========
 
     public static void toggleCakeDebug() {
-        cakeDebugEnabled = !cakeDebugEnabled;
+        ModConfig.setCakeDebugEnabled(!ModConfig.isCakeDebugEnabled());
     }
 
     public static void togglePlaceDebug() {
-        placeDebugEnabled = !placeDebugEnabled;
+        ModConfig.setPlaceDebugEnabled(!ModConfig.isPlaceDebugEnabled());
     }
 
     public static void toggleFoodDebug() {
-        foodDebugEnabled = !foodDebugEnabled;
+        ModConfig.setFoodDebugEnabled(!ModConfig.isFoodDebugEnabled());
     }
 
     public static void togglePotionDebug() {
-        potionDebugEnabled = !potionDebugEnabled;
+        ModConfig.setPotionDebugEnabled(!ModConfig.isPotionDebugEnabled());
     }
 
     public static void togglePotionDamage() {
-        potionDamageEnabled = !potionDamageEnabled;
+        ModConfig.setPotionDamageEnabled(!ModConfig.isPotionDamageEnabled());
     }
 
     public static void toggleSwiftThrow() {
-        swiftThrowEnabled = !swiftThrowEnabled;
+        ModConfig.setSwiftThrowEnabled(!ModConfig.isSwiftThrowEnabled());
     }
 
     public static void toggleClientDebug() {
-        clientDebugEnabled = !clientDebugEnabled;
+        ModConfig.setClientDebugEnabled(!ModConfig.isClientDebugEnabled());
     }
 
     public static void toggleFrostWalker() {
-        frostWalkerEnabled = !frostWalkerEnabled;
+        ModConfig.setFrostWalkerEnabled(!ModConfig.isFrostWalkerEnabled());
     }
 
     public static void toggleInfinityCooldown() {
-        infinityCooldownEnabled = !infinityCooldownEnabled;
+        ModConfig.setInfinityCooldownEnabled(!ModConfig.isInfinityCooldownEnabled());
     }
 }
