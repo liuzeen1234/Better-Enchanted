@@ -11,7 +11,8 @@
         "UnbreakingFoodMixin",
         "PotionItemMixin",
         "PotionEntityMixin",
-        "SwiftThrowTickMixin"
+        "SwiftThrowTickMixin",
+        "MultishotEnchantmentMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin",
