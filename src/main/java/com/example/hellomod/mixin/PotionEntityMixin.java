@@ -3,6 +3,7 @@ package com.example.hellomod.mixin;
 import com.example.hellomod.HelloMod;
 import com.example.hellomod.damage.PowerPotionDamageSource;
 import com.example.hellomod.damage.SharpPotionDamageSource;
+import com.example.hellomod.debug.DebugLogConfig;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
@@ -98,7 +99,7 @@ public abstract class PotionEntityMixin {
         // 锋利与力量叠加
         float totalDamage = sharpnessDamage + powerDamage;
 
-        HelloMod.LOGGER.info("[PotionDamage] Potion hit! Sharpness level={} (dmg={}), Power level={} (dmg={}), Punch level={}, Flame level={}, total dmg={}",
+        if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Potion hit! Sharpness level={} (dmg={}), Power level={} (dmg={}), Punch level={}, Flame level={}, total dmg={}",
                 sharpnessLevel, sharpnessDamage, powerLevel, powerDamage, punchLevel, flameLevel, totalDamage);
 
         // 选择伤害源：如果两个附魔都有，优先使用力量的伤害源（伤害更高的那个）
@@ -123,10 +124,10 @@ public abstract class PotionEntityMixin {
             if (target instanceof LivingEntity livingTarget) {
                 // 造成伤害
                 if (totalDamage > 0 && damageSource != null) {
-                    HelloMod.LOGGER.info("[PotionDamage] Direct hit on entity: {}, health BEFORE={}/{}, damage={}",
+                    if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Direct hit on entity: {}, health BEFORE={}/{}, damage={}",
                             livingTarget.getName().getString(), livingTarget.getHealth(), livingTarget.getMaxHealth(), totalDamage);
                     livingTarget.damage(damageSource, totalDamage);
-                    HelloMod.LOGGER.info("[PotionDamage] Direct hit on entity: {}, health AFTER={}/{}",
+                    if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Direct hit on entity: {}, health AFTER={}/{}",
                             livingTarget.getName().getString(), livingTarget.getHealth(), livingTarget.getMaxHealth());
                 }
 
@@ -139,7 +140,7 @@ public abstract class PotionEntityMixin {
                     // 我们要让实体沿药水飞行方向被推开，所以传入 velocity 分量的负值
                     // 这样 takeKnockback 内部取反后就是正的飞行方向
                     livingTarget.takeKnockback(knockbackStrength, -velocity.x / horizontalLength, -velocity.z / horizontalLength);
-                    HelloMod.LOGGER.info("[PotionDamage] Punch knockback on entity: {}, strength={}, direction=({}, {})",
+                    if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Punch knockback on entity: {}, strength={}, direction=({}, {})",
                             livingTarget.getName().getString(), knockbackStrength,
                             velocity.x / horizontalLength, velocity.z / horizontalLength);
                 }
@@ -148,7 +149,7 @@ public abstract class PotionEntityMixin {
                 // 原版 Flame 附魔使箭矢点燃目标5秒（100 ticks）
                 if (flameLevel > 0) {
                     livingTarget.setOnFireFor(5);
-                    HelloMod.LOGGER.info("[PotionDamage] Flame ignited entity: {} for 5 seconds (health: {}/{})",
+                    if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Flame ignited entity: {} for 5 seconds (health: {}/{})",
                             livingTarget.getName().getString(), livingTarget.getHealth(), livingTarget.getMaxHealth());
                 }
             }
@@ -178,7 +179,7 @@ public abstract class PotionEntityMixin {
                     float splashDamage = (float) (totalDamage * factor);
                     if (splashDamage > 0.5f) {
                         entity.damage(damageSource, splashDamage);
-                        HelloMod.LOGGER.info("[PotionDamage] Splash damage {} to entity: {} (distance: {})",
+                        if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Splash damage {} to entity: {} (distance: {})",
                                 splashDamage, entity.getName().getString(), distance);
                     }
                 }
@@ -194,7 +195,7 @@ public abstract class PotionEntityMixin {
                         double splashKnockbackStrength = punchLevel * 0.6 * factor;
                         // takeKnockback 将实体推向 (-x, 0, -z) 方向，所以传入负的方向向量
                         entity.takeKnockback(splashKnockbackStrength, -dx / splashHorizontalLength, -dz / splashHorizontalLength);
-                        HelloMod.LOGGER.info("[PotionDamage] Splash punch knockback {} to entity: {} (distance: {})",
+                        if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Splash punch knockback {} to entity: {} (distance: {})",
                                 splashKnockbackStrength, entity.getName().getString(), distance);
                     }
                 }
@@ -205,7 +206,7 @@ public abstract class PotionEntityMixin {
                     int fireDuration = (int) Math.ceil(5 * factor);
                     if (fireDuration > 0) {
                         entity.setOnFireFor(fireDuration);
-                        HelloMod.LOGGER.info("[PotionDamage] Splash flame ignited entity: {} for {} seconds (distance: {}, health: {}/{})",
+                        if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Splash flame ignited entity: {} for {} seconds (distance: {}, health: {}/{})",
                                 entity.getName().getString(), fireDuration, distance, entity.getHealth(), entity.getMaxHealth());
                     }
                 }
@@ -234,16 +235,16 @@ public abstract class PotionEntityMixin {
                             lightning.refreshPositionAfterTeleport(Vec3d.ofBottomCenter(targetPos));
                             lightning.setChanneler(channeler);
                             serverWorld.spawnEntity(lightning);
-                            HelloMod.LOGGER.info("[PotionDamage] Channeling struck lightning at entity: {} pos=({}, {}, {})",
+                            if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Channeling struck lightning at entity: {} pos=({}, {}, {})",
                                     target.getName().getString(), targetPos.getX(), targetPos.getY(), targetPos.getZ());
                         }
                     } else {
-                        HelloMod.LOGGER.info("[PotionDamage] Channeling skipped entity (no sky): {} pos=({}, {}, {})",
+                        if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Channeling skipped entity (no sky): {} pos=({}, {}, {})",
                                 target.getName().getString(), targetPos.getX(), targetPos.getY(), targetPos.getZ());
                     }
                 }
             } else {
-                HelloMod.LOGGER.info("[PotionDamage] Channeling not triggered: not thundering");
+                if (DebugLogConfig.isPotionDamageEnabled()) HelloMod.LOGGER.info("[PotionDamage] Channeling not triggered: not thundering");
             }
         }
     }

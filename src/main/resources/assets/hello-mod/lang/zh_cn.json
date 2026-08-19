@@ -8,6 +8,8 @@
   "screen.hello-mod.debug_menu.title": "调试功能菜单",
   "screen.hello-mod.debug_menu.health_hud_entry": "实体血量显示",
   "screen.hello-mod.debug_menu.item_hud_entry": "手持物品显示",
+  "screen.hello-mod.debug_menu.debug_log_entry": "调试日志开关",
+  "screen.hello-mod.debug_log_setting.title": "调试日志开关设置",
   "screen.hello-mod.health_hud_setting.title": "实体血量显示设置",
   "screen.hello-mod.health_hud_setting.toggle": "显示: %s",
   "screen.hello-mod.item_hud_setting.title": "手持物品显示设置",

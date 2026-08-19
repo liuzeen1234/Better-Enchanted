@@ -1,6 +1,7 @@
 package com.example.hellomod.enchantment;
 
 import com.example.hellomod.HelloMod;
+import com.example.hellomod.debug.DebugLogConfig;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
@@ -65,12 +66,12 @@ public class InfinityCooldownManager {
     public static void triggerCooldown(PlayerEntity player, int cooldownTicks) {
         if (cooldownTicks <= 0) {
             // 冷却时间为0或负数时不触发冷却
-            HelloMod.LOGGER.info("[InfinityCooldown] Cooldown skipped for player: {} (duration=0)",
+            if (DebugLogConfig.isInfinityCooldownEnabled()) HelloMod.LOGGER.info("[InfinityCooldown] Cooldown skipped for player: {} (duration=0)",
                     player.getName().getString());
             return;
         }
         cooldownMap.put(player.getUuid(), cooldownTicks);
-        HelloMod.LOGGER.info("[InfinityCooldown] Cooldown triggered for player: {}, duration: {}ticks ({}s)",
+        if (DebugLogConfig.isInfinityCooldownEnabled()) HelloMod.LOGGER.info("[InfinityCooldown] Cooldown triggered for player: {}, duration: {}ticks ({}s)",
                 player.getName().getString(), cooldownTicks, String.format("%.1f", cooldownTicks / 20.0f));
 
         // 同步冷却状态到客户端（用于渲染冷却动画）

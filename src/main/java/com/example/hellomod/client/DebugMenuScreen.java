@@ -20,7 +20,7 @@ public class DebugMenuScreen extends Screen {
         int buttonWidth = 200;
         int buttonHeight = 20;
         int centerX = this.width / 2 - buttonWidth / 2;
-        int startY = this.height / 2 - 30;
+        int startY = this.height / 2 - 45;
 
         // 实体血量显示 -> 进入二级菜单
         this.addDrawableChild(ButtonWidget.builder(
@@ -33,6 +33,12 @@ public class DebugMenuScreen extends Screen {
                 Text.translatable("screen.hello-mod.debug_menu.item_hud_entry"),
                 button -> this.client.setScreen(new ItemHudSettingScreen(this))
         ).dimensions(centerX, startY + 30, buttonWidth, buttonHeight).build());
+
+        // 调试日志开关 -> 进入二级菜单
+        this.addDrawableChild(ButtonWidget.builder(
+                Text.translatable("screen.hello-mod.debug_menu.debug_log_entry"),
+                button -> this.client.setScreen(new DebugLogSettingScreen(this))
+        ).dimensions(centerX, startY + 60, buttonWidth, buttonHeight).build());
     }
 
     @Override

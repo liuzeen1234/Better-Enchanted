@@ -1,6 +1,7 @@
 package com.example.hellomod.effect;
 
 import com.example.hellomod.HelloMod;
+import com.example.hellomod.debug.DebugLogConfig;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -83,7 +84,7 @@ public class FrostWalkerFoodEffect {
                     iterator.remove();
                     // 效果结束时重置冰冻视觉
                     player.setFrozenTicks(0);
-                    HelloMod.LOGGER.info("[FrostWalker] Effect expired for player {}", player.getName().getString());
+                    if (DebugLogConfig.isFrostWalkerEnabled()) HelloMod.LOGGER.info("[FrostWalker] Effect expired for player {}", player.getName().getString());
                     continue;
                 }
 
@@ -100,7 +101,7 @@ public class FrostWalkerFoodEffect {
                 if (state.damageCooldown <= 0) {
                     // 造成1点霜冻伤害
                     player.damage(createFreezeDamage(player.getServerWorld()), 1.0f);
-                    HelloMod.LOGGER.info("[FrostWalker] Dealt 1 freeze damage to player {} (interval: {}t, remaining: {}t)",
+                    if (DebugLogConfig.isFrostWalkerEnabled()) HelloMod.LOGGER.info("[FrostWalker] Dealt 1 freeze damage to player {} (interval: {}t, remaining: {}t)",
                             player.getName().getString(), state.damageInterval, state.remainingTicks);
                     state.damageCooldown = state.damageInterval;
                 }
@@ -116,7 +117,7 @@ public class FrostWalkerFoodEffect {
         ACTIVE_EFFECTS.put(player.getUuid(), new FrostWalkerState(level));
         int durationSeconds = 20 + level * 10;
         double intervalSeconds = Math.max(0.5, 4.0 - level * 0.5);
-        HelloMod.LOGGER.info("[FrostWalker] Applied frost walker level {} to player {} (duration: {}s, damage interval: {}s)",
+        if (DebugLogConfig.isFrostWalkerEnabled()) HelloMod.LOGGER.info("[FrostWalker] Applied frost walker level {} to player {} (duration: {}s, damage interval: {}s)",
                 level, player.getName().getString(), durationSeconds, intervalSeconds);
     }
 

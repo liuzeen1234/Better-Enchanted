@@ -2,6 +2,7 @@ package com.example.hellomod.mixin;
 
 import com.example.hellomod.HelloMod;
 import com.example.hellomod.damage.SharpFoodDamageSource;
+import com.example.hellomod.debug.DebugLogConfig;
 import com.example.hellomod.effect.FrostWalkerFoodEffect;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -24,7 +25,7 @@ public abstract class PlayerEatFoodMixin {
     @Inject(method = "eatFood", at = @At("HEAD"))
     private void onEatFood(World world, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
-        HelloMod.LOGGER.info("[FoodDebug] eatFood HEAD called! isClient={}, Item: {}, NBT: {}",
+        if (DebugLogConfig.isFoodDebugEnabled()) HelloMod.LOGGER.info("[FoodDebug] eatFood HEAD called! isClient={}, Item: {}, NBT: {}",
                 world.isClient(), stack.getItem(), stack.getNbt());
 
         if (!world.isClient()) {
@@ -32,13 +33,13 @@ public abstract class PlayerEatFoodMixin {
             int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, stack);
             if (sharpnessLevel > 0) {
                 float damage = 0.5f * sharpnessLevel + 0.5f;
-                HelloMod.LOGGER.info("[FoodDebug] Sharpness level: {}, damage: {}", sharpnessLevel, damage);
+                if (DebugLogConfig.isFoodDebugEnabled()) HelloMod.LOGGER.info("[FoodDebug] Sharpness level: {}, damage: {}", sharpnessLevel, damage);
                 player.damage(SharpFoodDamageSource.create(world, stack), damage);
             }
 
             // 击退附魔：对食用者施加击退
             int knockbackLevel = EnchantmentHelper.getLevel(Enchantments.KNOCKBACK, stack);
-            HelloMod.LOGGER.info("[FoodDebug] Knockback level: {}", knockbackLevel);
+            if (DebugLogConfig.isFoodDebugEnabled()) HelloMod.LOGGER.info("[FoodDebug] Knockback level: {}", knockbackLevel);
             if (knockbackLevel > 0) {
                 applyKnockback(player, knockbackLevel);
             }
@@ -47,18 +48,18 @@ public abstract class PlayerEatFoodMixin {
             // 参考MC 1.20.4原版火焰附加逻辑：在EnchantmentHelper.onTargetDamaged中
             // 调用target.setOnFireFor(level * 4)，即每级点燃4秒
             int fireAspectLevel = EnchantmentHelper.getLevel(Enchantments.FIRE_ASPECT, stack);
-            HelloMod.LOGGER.info("[FoodDebug] Fire Aspect level: {}", fireAspectLevel);
+            if (DebugLogConfig.isFoodDebugEnabled()) HelloMod.LOGGER.info("[FoodDebug] Fire Aspect level: {}", fireAspectLevel);
             if (fireAspectLevel > 0) {
                 player.setOnFireFor(fireAspectLevel * 4);
-                HelloMod.LOGGER.info("[FoodDebug] Set player on fire for {} seconds", fireAspectLevel * 4);
+                if (DebugLogConfig.isFoodDebugEnabled()) HelloMod.LOGGER.info("[FoodDebug] Set player on fire for {} seconds", fireAspectLevel * 4);
             }
 
             // 冰霜行者附魔：获得冰霜行者效果
             int frostWalkerLevel = EnchantmentHelper.getLevel(Enchantments.FROST_WALKER, stack);
-            HelloMod.LOGGER.info("[FoodDebug] Frost Walker level: {}", frostWalkerLevel);
+            if (DebugLogConfig.isFoodDebugEnabled()) HelloMod.LOGGER.info("[FoodDebug] Frost Walker level: {}", frostWalkerLevel);
             if (frostWalkerLevel > 0) {
                 FrostWalkerFoodEffect.apply(player, frostWalkerLevel);
-                HelloMod.LOGGER.info("[FoodDebug] Applied Frost Walker level {} to player", frostWalkerLevel);
+                if (DebugLogConfig.isFoodDebugEnabled()) HelloMod.LOGGER.info("[FoodDebug] Applied Frost Walker level {} to player", frostWalkerLevel);
             }
         }
     }

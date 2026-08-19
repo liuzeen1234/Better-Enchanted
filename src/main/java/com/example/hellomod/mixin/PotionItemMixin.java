@@ -1,6 +1,7 @@
 package com.example.hellomod.mixin;
 
 import com.example.hellomod.HelloMod;
+import com.example.hellomod.debug.DebugLogConfig;
 import com.example.hellomod.enchantment.InfinityCooldownManager;
 import com.example.hellomod.enchantment.ModEnchantments;
 import com.example.hellomod.enchantment.SwiftThrowEnchantment;
@@ -73,13 +74,13 @@ public abstract class PotionItemMixin {
         // 冷却检查（仅服务端）：如果物品带 InfinityMarked 标记且玩家处于冷却中，拦截使用
         if (!world.isClient() && InfinityCooldownManager.isInfinityMarked(stack) && InfinityCooldownManager.isOnCooldown(user)) {
             int remaining = InfinityCooldownManager.getRemainingCooldown(user);
-            HelloMod.LOGGER.info("[PotionDebug] Infinity cooldown active! Remaining: {} ticks ({}s). Use blocked.",
+            if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Infinity cooldown active! Remaining: {} ticks ({}s). Use blocked.",
                     remaining, String.format("%.1f", remaining / 20.0f));
             cir.setReturnValue(TypedActionResult.fail(stack));
             return;
         }
 
-        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}, QuickCharge={}, Piercing={}, Loyalty={}",
+        if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}, QuickCharge={}, Piercing={}, Loyalty={}",
                 sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel, multishotLevel, quickChargeLevel, piercingLevel, loyaltyLevel);
 
         if (!world.isClient()) {
@@ -152,7 +153,7 @@ public abstract class PotionItemMixin {
                     }
                 }
 
-                HelloMod.LOGGER.info("[SwiftThrow] Raycast mode! Level={}, speed={}, direction=({}, {}, {})",
+                if (DebugLogConfig.isSwiftThrowEnabled()) HelloMod.LOGGER.info("[SwiftThrow] Raycast mode! Level={}, speed={}, direction=({}, {}, {})",
                         swiftThrowLevel, actualSpeed, direction.x, direction.y, direction.z);
 
             } else if (swiftThrowLevel > 0) {
@@ -176,7 +177,7 @@ public abstract class PotionItemMixin {
                         potionEntity.getZ() + normalizedDir.z * 1.0
                 );
 
-                HelloMod.LOGGER.info("[SwiftThrow] Normal mode! Level={}, speed={}", swiftThrowLevel, actualSpeed);
+                if (DebugLogConfig.isSwiftThrowEnabled()) HelloMod.LOGGER.info("[SwiftThrow] Normal mode! Level={}, speed={}", swiftThrowLevel, actualSpeed);
             } else {
                 // 无迅投时使用原版逻辑
                 potionEntity.setVelocity(user, user.getPitch(), user.getYaw(), -20.0f, actualSpeed, 1.0f);
@@ -325,7 +326,7 @@ public abstract class PotionItemMixin {
 
                     world.spawnEntity(extraPotion);
                 }
-                HelloMod.LOGGER.info("[PotionDebug] Multishot Lv{}: spawned {} extra potions ({}on circle, {} inner random)",
+                if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Multishot Lv{}: spawned {} extra potions ({}on circle, {} inner random)",
                         multishotLevel, extraCount, circleCount, innerCount);
             }
         }
@@ -344,38 +345,38 @@ public abstract class PotionItemMixin {
                 // 忠诚附魔：投掷时立即消耗药水（因为药水实体自身会返回并归还物品）
                 // 如果药水途中碰到东西就不会返回（正常消耗掉了）
                 stack.decrement(1);
-                HelloMod.LOGGER.info("[PotionDebug] Loyalty active! Potion consumed on throw (will return if not blocked).");
+                if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Loyalty active! Potion consumed on throw (will return if not blocked).");
             } else if (infinityLevel > 0) {
                 // 计算快速装填减少后的冷却时间
                 int cooldownTicks = InfinityCooldownManager.getReducedCooldown(quickChargeLevel);
 
                 if (unbreakingLevel > 0) {
                     if (user.getRandom().nextInt(unbreakingLevel + 1) > 0) {
-                        HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check PASSED, no cooldown.");
+                        if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check PASSED, no cooldown.");
                     } else {
                         if (cooldownTicks > 0) {
                             InfinityCooldownManager.triggerCooldown(user, cooldownTicks);
-                            HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, {}s cooldown applied (QuickCharge Lv{}).",
+                            if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, {}s cooldown applied (QuickCharge Lv{}).",
                                     String.format("%.1f", cooldownTicks / 20.0f), quickChargeLevel);
                         } else {
-                            HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, but QuickCharge Lv{} negates cooldown.", quickChargeLevel);
+                            if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Infinity + Unbreaking: durability check FAILED, but QuickCharge Lv{} negates cooldown.", quickChargeLevel);
                         }
                     }
                 } else {
                     if (cooldownTicks > 0) {
                         InfinityCooldownManager.triggerCooldown(user, cooldownTicks);
-                        HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: {}s cooldown applied (QuickCharge Lv{}).",
+                        if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: {}s cooldown applied (QuickCharge Lv{}).",
                                 String.format("%.1f", cooldownTicks / 20.0f), quickChargeLevel);
                     } else {
-                        HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: QuickCharge Lv{} negates cooldown.", quickChargeLevel);
+                        if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Infinity without Unbreaking: QuickCharge Lv{} negates cooldown.", quickChargeLevel);
                     }
                 }
-                HelloMod.LOGGER.info("[PotionDebug] Infinity active! Potion NOT consumed.");
+                if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Infinity active! Potion NOT consumed.");
             } else if (unbreakingLevel > 0 && user.getRandom().nextInt(unbreakingLevel + 1) > 0) {
-                HelloMod.LOGGER.info("[PotionDebug] Unbreaking triggered! Potion NOT consumed.");
+                if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Unbreaking triggered! Potion NOT consumed.");
             } else {
                 stack.decrement(1);
-                HelloMod.LOGGER.info("[PotionDebug] Potion consumed normally.");
+                if (DebugLogConfig.isPotionDebugEnabled()) HelloMod.LOGGER.info("[PotionDebug] Potion consumed normally.");
             }
         }
 
