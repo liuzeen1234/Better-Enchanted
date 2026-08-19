@@ -24,8 +24,8 @@ public class DebugLogSettingScreen extends Screen {
         int buttonHeight = 20;
         int gap = 22;
         int centerX = this.width / 2 - buttonWidth / 2;
-        // 9个按钮 + 1个返回按钮，居中布局
-        int totalHeight = 10 * gap;
+        // 9个开关按钮，居中布局
+        int totalHeight = 9 * gap;
         int startY = this.height / 2 - totalHeight / 2;
 
         // 1. [CakeDebug] 蛋糕食用调试
@@ -109,11 +109,7 @@ public class DebugLogSettingScreen extends Screen {
                 }
         ).dimensions(centerX, startY + gap * 8, buttonWidth, buttonHeight).build());
 
-        // 返回按钮
-        this.addDrawableChild(ButtonWidget.builder(
-                Text.translatable("screen.hello-mod.back"),
-                button -> this.client.setScreen(parent)
-        ).dimensions(centerX, startY + gap * 9, buttonWidth, buttonHeight).build());
+
     }
 
     private Text getToggleText(String label, boolean enabled) {

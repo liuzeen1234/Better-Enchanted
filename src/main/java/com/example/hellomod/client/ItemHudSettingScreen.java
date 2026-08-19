@@ -33,11 +33,7 @@ public class ItemHudSettingScreen extends Screen {
 
         this.addDrawableChild(toggleButton);
 
-        // 返回按钮
-        this.addDrawableChild(ButtonWidget.builder(
-                Text.translatable("screen.hello-mod.back"),
-                button -> this.client.setScreen(parent)
-        ).dimensions(centerX, centerY + 20, buttonWidth, buttonHeight).build());
+
     }
 
     private Text getToggleText() {
