@@ -187,68 +187,116 @@ public abstract class PotionItemMixin {
 
             world.spawnEntity(potionEntity);
 
-            // 多重射击 (Multishot)：额外生成2个药水实体，左右各偏移10°（仅水平方向）
-            // 参考MC 1.20.4弩多重射击规则：一次射出3支箭（中间+左右各偏移10°）
-            // 只消耗1个药水
+            // 多重射击 (Multishot)：额外生成投掷物，以圆锥散布
+            // 总投掷物数量 = 2 + level（Lv I=3, Lv II=4, Lv III=5...）
+            // 第1个（已生成）沿瞄准方向直飞（圆心）
+            // 额外投掷物分布规则：
+            //   - 前8个均匀分布在以瞄准方向为中心、10°为半径的圆周上
+            //   - 超过8个时，多出来的向圆内（0°~10°）随机方向投掷
             if (multishotLevel > 0) {
-                float[] yawOffsets = {-10.0f, 10.0f}; // 左右偏移角度
-                for (float yawOffset : yawOffsets) {
+                int extraCount = multishotLevel + 1; // 额外投掷物数量
+                int circleCount = Math.min(extraCount, 8); // 圆周上最多8个
+                int innerCount = extraCount - circleCount; // 圆内随机的数量
+
+                // 计算瞄准方向的基准向量（用于构建圆锥坐标系）
+                float basePitch = user.getPitch();
+                float baseYaw = user.getYaw();
+                if (swiftThrowLevel > 0) {
+                    basePitch += pitchOffset;
+                }
+
+                float baseYawRad = baseYaw * ((float) Math.PI / 180.0f);
+                float basePitchRad = basePitch * ((float) Math.PI / 180.0f);
+
+                // 基准方向向量（单位向量）
+                double forwardX = -Math.sin(baseYawRad) * Math.cos(basePitchRad);
+                double forwardY = -Math.sin(basePitchRad);
+                double forwardZ = Math.cos(baseYawRad) * Math.cos(basePitchRad);
+                Vec3d forward = new Vec3d(forwardX, forwardY, forwardZ).normalize();
+
+                // 构建正交基：right 和 up（用于在圆锥上分布方向）
+                // right = forward × worldUp（如果forward接近竖直则用worldRight）
+                Vec3d worldUp = new Vec3d(0, 1, 0);
+                Vec3d right;
+                if (Math.abs(forward.dotProduct(worldUp)) > 0.99) {
+                    // forward 接近竖直，用 worldZ 作为辅助
+                    right = forward.crossProduct(new Vec3d(0, 0, 1)).normalize();
+                } else {
+                    right = forward.crossProduct(worldUp).normalize();
+                }
+                Vec3d up = right.crossProduct(forward).normalize();
+
+                float coneAngleRad = 10.0f * ((float) Math.PI / 180.0f); // 10度圆锥半角
+
+                for (int i = 0; i < extraCount; i++) {
                     PotionEntity extraPotion = new PotionEntity(world, user);
                     extraPotion.setItem(stack.copy());
 
-                    // 计算偏移后的飞行方向
-                    float offsetYaw = user.getYaw() + yawOffset;
+                    Vec3d extraDirection;
 
+                    if (i < circleCount) {
+                        // 圆周上均匀分布：角度 = i * (360 / circleCount)
+                        double circleAngle = (2.0 * Math.PI * i) / circleCount;
+                        // 在圆锥表面上的方向：forward 偏转 coneAngle，沿 circleAngle 旋转
+                        double offsetX = Math.cos(circleAngle);
+                        double offsetY = Math.sin(circleAngle);
+                        // 偏转方向 = forward * cos(coneAngle) + (right * offsetX + up * offsetY) * sin(coneAngle)
+                        double sinCone = Math.sin(coneAngleRad);
+                        double cosCone = Math.cos(coneAngleRad);
+                        extraDirection = forward.multiply(cosCone)
+                                .add(right.multiply(sinCone * offsetX))
+                                .add(up.multiply(sinCone * offsetY))
+                                .normalize();
+                    } else {
+                        // 圆内随机：随机角度 + 随机半径（0~10°）
+                        double randomCircleAngle = user.getRandom().nextDouble() * 2.0 * Math.PI;
+                        // 使用sqrt保证面积均匀分布
+                        double randomRadius = Math.sqrt(user.getRandom().nextDouble()) * coneAngleRad;
+                        double sinR = Math.sin(randomRadius);
+                        double cosR = Math.cos(randomRadius);
+                        double offsetX = Math.cos(randomCircleAngle);
+                        double offsetY = Math.sin(randomCircleAngle);
+                        extraDirection = forward.multiply(cosR)
+                                .add(right.multiply(sinR * offsetX))
+                                .add(up.multiply(sinR * offsetY))
+                                .normalize();
+                    }
+
+                    // 根据迅投模式设置速度
                     if (swiftThrowLevel > 20) {
-                        // 射线追踪模式下的多重射击
+                        // 射线追踪模式
                         float safeLaunchSpeed = baseSpeed * SwiftThrowEnchantment.getSpeedMultiplier(20);
-                        float adjustedPitch = user.getPitch() + pitchOffset;
-                        float yawRad = offsetYaw * ((float) Math.PI / 180.0f);
-                        float pitchRad = adjustedPitch * ((float) Math.PI / 180.0f);
-
-                        double vx = -Math.sin(yawRad) * Math.cos(pitchRad);
-                        double vy = -Math.sin(pitchRad);
-                        double vz = Math.cos(yawRad) * Math.cos(pitchRad);
-
-                        Vec3d direction = new Vec3d(vx, vy, vz).normalize();
-                        extraPotion.setVelocity(direction.multiply(safeLaunchSpeed));
+                        extraPotion.setVelocity(extraDirection.multiply(safeLaunchSpeed));
                         extraPotion.setPosition(
-                                extraPotion.getX() + direction.x * 1.5,
-                                extraPotion.getY() + direction.y * 1.5,
-                                extraPotion.getZ() + direction.z * 1.5
+                                extraPotion.getX() + extraDirection.x * 1.5,
+                                extraPotion.getY() + extraDirection.y * 1.5,
+                                extraPotion.getZ() + extraDirection.z * 1.5
                         );
 
                         NbtCompound extraNbt = extraPotion.getStack().getOrCreateNbt();
                         extraNbt.putBoolean("SwiftThrowRaycast", true);
                         extraNbt.putFloat("SwiftThrowSpeed", actualSpeed);
-                        extraNbt.putDouble("SwiftThrowDirX", direction.x);
-                        extraNbt.putDouble("SwiftThrowDirY", direction.y);
-                        extraNbt.putDouble("SwiftThrowDirZ", direction.z);
+                        extraNbt.putDouble("SwiftThrowDirX", extraDirection.x);
+                        extraNbt.putDouble("SwiftThrowDirY", extraDirection.y);
+                        extraNbt.putDouble("SwiftThrowDirZ", extraDirection.z);
 
                         extraPotion.setInvisible(true);
                         extraPotion.setNoGravity(true);
                     } else if (swiftThrowLevel > 0) {
-                        // 迅投正常物理模式下的多重射击
-                        float adjustedPitch = user.getPitch() + pitchOffset;
-                        float yawRad = offsetYaw * ((float) Math.PI / 180.0f);
-                        float pitchRad = adjustedPitch * ((float) Math.PI / 180.0f);
-
-                        double vx = -Math.sin(yawRad) * Math.cos(pitchRad);
-                        double vy = -Math.sin(pitchRad);
-                        double vz = Math.cos(yawRad) * Math.cos(pitchRad);
-
-                        Vec3d direction = new Vec3d(vx, vy, vz).normalize().multiply(actualSpeed);
-                        extraPotion.setVelocity(direction);
-
-                        Vec3d normalizedDir = direction.normalize();
+                        // 迅投正常物理模式
+                        Vec3d velocity = extraDirection.multiply(actualSpeed);
+                        extraPotion.setVelocity(velocity);
                         extraPotion.setPosition(
-                                extraPotion.getX() + normalizedDir.x * 1.0,
-                                extraPotion.getY() + normalizedDir.y * 1.0,
-                                extraPotion.getZ() + normalizedDir.z * 1.0
+                                extraPotion.getX() + extraDirection.x * 1.0,
+                                extraPotion.getY() + extraDirection.y * 1.0,
+                                extraPotion.getZ() + extraDirection.z * 1.0
                         );
                     } else {
-                        // 无迅投时使用原版投掷逻辑，调整yaw偏移
-                        extraPotion.setVelocity(user, user.getPitch(), offsetYaw, -20.0f, baseSpeed, 1.0f);
+                        // 无迅投：用方向向量反算 yaw/pitch 来调用原版 setVelocity
+                        double horizLen = Math.sqrt(extraDirection.x * extraDirection.x + extraDirection.z * extraDirection.z);
+                        float extraYaw = (float) Math.toDegrees(Math.atan2(-extraDirection.x, extraDirection.z));
+                        float extraPitch = (float) Math.toDegrees(Math.atan2(-extraDirection.y, horizLen));
+                        extraPotion.setVelocity(user, extraPitch, extraYaw, -20.0f, baseSpeed, 1.0f);
                     }
 
                     // 将附魔信息写入额外的药水实体
@@ -260,7 +308,8 @@ public abstract class PotionItemMixin {
 
                     world.spawnEntity(extraPotion);
                 }
-                HelloMod.LOGGER.info("[PotionDebug] Multishot: spawned 2 extra potions at ±10° yaw offset");
+                HelloMod.LOGGER.info("[PotionDebug] Multishot Lv{}: spawned {} extra potions ({}on circle, {} inner random)",
+                        multishotLevel, extraCount, circleCount, innerCount);
             }
         }
 
