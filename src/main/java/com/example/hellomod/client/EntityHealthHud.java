@@ -19,7 +19,7 @@ import net.minecraft.util.math.Vec3d;
 public class EntityHealthHud {
 
     private static boolean enabled = true;
-    private static final double REACH_DISTANCE = 32.0;
+    private static final double REACH_DISTANCE = 128.0;
 
     public static boolean isEnabled() {
         return enabled;
