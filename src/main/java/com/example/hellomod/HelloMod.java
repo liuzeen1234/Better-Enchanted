@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
 public class HelloMod implements ModInitializer {
 
     public static final String MOD_ID = "hello-mod";
-    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final Logger LOGGER = LoggerFactory.getLogger("BetterEnchanted");
 
     @Override
     public void onInitialize() {
-        LOGGER.info("Hello Mod initialized!");
+        LOGGER.info("Better Enchanted initialized!");
 
         // 注册自定义附魔
         ModEnchantments.register();

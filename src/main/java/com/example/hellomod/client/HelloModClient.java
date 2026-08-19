@@ -19,7 +19,7 @@ import org.lwjgl.glfw.GLFW;
  */
 public class HelloModClient implements ClientModInitializer {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("hello-mod");
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("BetterEnchanted");
     private int lastCount = -1;
 
     /** 手持物品显示是否开启 */
