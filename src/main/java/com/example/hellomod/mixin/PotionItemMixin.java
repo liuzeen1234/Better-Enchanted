@@ -9,8 +9,6 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.LingeringPotionItem;
-import net.minecraft.item.SplashPotionItem;
 import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
@@ -54,11 +52,12 @@ public abstract class PotionItemMixin {
         int infinityLevel = EnchantmentHelper.getLevel(Enchantments.INFINITY, stack);
         int channelingLevel = EnchantmentHelper.getLevel(Enchantments.CHANNELING, stack);
         int swiftThrowLevel = EnchantmentHelper.getLevel(ModEnchantments.SWIFT_THROW, stack);
+        int multishotLevel = EnchantmentHelper.getLevel(Enchantments.MULTISHOT, stack);
 
         // 如果没有任何附魔，让原版逻辑处理
         if (sharpnessLevel <= 0 && unbreakingLevel <= 0 && powerLevel <= 0
                 && punchLevel <= 0 && flameLevel <= 0 && infinityLevel <= 0 && channelingLevel <= 0
-                && swiftThrowLevel <= 0) {
+                && swiftThrowLevel <= 0 && multishotLevel <= 0) {
             return;
         }
 
@@ -76,8 +75,8 @@ public abstract class PotionItemMixin {
             return;
         }
 
-        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}",
-                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel);
+        HelloMod.LOGGER.info("[PotionDebug] Throwing enchanted potion! Sharpness={}, Unbreaking={}, Power={}, Punch={}, Flame={}, Infinity={}, Channeling={}, SwiftThrow={}, Multishot={}",
+                sharpnessLevel, unbreakingLevel, powerLevel, punchLevel, flameLevel, infinityLevel, channelingLevel, swiftThrowLevel, multishotLevel);
 
         if (!world.isClient()) {
             // 创建药水实体
@@ -187,6 +186,82 @@ public abstract class PotionItemMixin {
             potionEntity.writeCustomDataToNbt(entityNbt);
 
             world.spawnEntity(potionEntity);
+
+            // 多重射击 (Multishot)：额外生成2个药水实体，左右各偏移10°（仅水平方向）
+            // 参考MC 1.20.4弩多重射击规则：一次射出3支箭（中间+左右各偏移10°）
+            // 只消耗1个药水
+            if (multishotLevel > 0) {
+                float[] yawOffsets = {-10.0f, 10.0f}; // 左右偏移角度
+                for (float yawOffset : yawOffsets) {
+                    PotionEntity extraPotion = new PotionEntity(world, user);
+                    extraPotion.setItem(stack.copy());
+
+                    // 计算偏移后的飞行方向
+                    float offsetYaw = user.getYaw() + yawOffset;
+
+                    if (swiftThrowLevel > 20) {
+                        // 射线追踪模式下的多重射击
+                        float safeLaunchSpeed = baseSpeed * SwiftThrowEnchantment.getSpeedMultiplier(20);
+                        float adjustedPitch = user.getPitch() + pitchOffset;
+                        float yawRad = offsetYaw * ((float) Math.PI / 180.0f);
+                        float pitchRad = adjustedPitch * ((float) Math.PI / 180.0f);
+
+                        double vx = -Math.sin(yawRad) * Math.cos(pitchRad);
+                        double vy = -Math.sin(pitchRad);
+                        double vz = Math.cos(yawRad) * Math.cos(pitchRad);
+
+                        Vec3d direction = new Vec3d(vx, vy, vz).normalize();
+                        extraPotion.setVelocity(direction.multiply(safeLaunchSpeed));
+                        extraPotion.setPosition(
+                                extraPotion.getX() + direction.x * 1.5,
+                                extraPotion.getY() + direction.y * 1.5,
+                                extraPotion.getZ() + direction.z * 1.5
+                        );
+
+                        NbtCompound extraNbt = extraPotion.getStack().getOrCreateNbt();
+                        extraNbt.putBoolean("SwiftThrowRaycast", true);
+                        extraNbt.putFloat("SwiftThrowSpeed", actualSpeed);
+                        extraNbt.putDouble("SwiftThrowDirX", direction.x);
+                        extraNbt.putDouble("SwiftThrowDirY", direction.y);
+                        extraNbt.putDouble("SwiftThrowDirZ", direction.z);
+
+                        extraPotion.setInvisible(true);
+                        extraPotion.setNoGravity(true);
+                    } else if (swiftThrowLevel > 0) {
+                        // 迅投正常物理模式下的多重射击
+                        float adjustedPitch = user.getPitch() + pitchOffset;
+                        float yawRad = offsetYaw * ((float) Math.PI / 180.0f);
+                        float pitchRad = adjustedPitch * ((float) Math.PI / 180.0f);
+
+                        double vx = -Math.sin(yawRad) * Math.cos(pitchRad);
+                        double vy = -Math.sin(pitchRad);
+                        double vz = Math.cos(yawRad) * Math.cos(pitchRad);
+
+                        Vec3d direction = new Vec3d(vx, vy, vz).normalize().multiply(actualSpeed);
+                        extraPotion.setVelocity(direction);
+
+                        Vec3d normalizedDir = direction.normalize();
+                        extraPotion.setPosition(
+                                extraPotion.getX() + normalizedDir.x * 1.0,
+                                extraPotion.getY() + normalizedDir.y * 1.0,
+                                extraPotion.getZ() + normalizedDir.z * 1.0
+                        );
+                    } else {
+                        // 无迅投时使用原版投掷逻辑，调整yaw偏移
+                        extraPotion.setVelocity(user, user.getPitch(), offsetYaw, -20.0f, baseSpeed, 1.0f);
+                    }
+
+                    // 将附魔信息写入额外的药水实体
+                    NbtCompound extraEntityNbt = new NbtCompound();
+                    if (sharpnessLevel > 0) {
+                        extraEntityNbt.putInt("SharpnessLevel", sharpnessLevel);
+                    }
+                    extraPotion.writeCustomDataToNbt(extraEntityNbt);
+
+                    world.spawnEntity(extraPotion);
+                }
+                HelloMod.LOGGER.info("[PotionDebug] Multishot: spawned 2 extra potions at ±10° yaw offset");
+            }
         }
 
         // 播放音效
