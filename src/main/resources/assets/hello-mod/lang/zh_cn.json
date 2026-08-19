@@ -4,7 +4,9 @@
   "death.attack.hello-mod.sharp_potion": "%1$s被锋利的药水砸死了",
   "death.attack.hello-mod.power_potion": "%1$s被强力药水砸死了",
   "category.hello-mod.hud": "Better Enchanted HUD",
-  "key.hello-mod.toggle_health_hud": "切换实体血量显示",
-  "key.hello-mod.toggle_item_hud": "切换手持物品显示",
+  "key.hello-mod.open_debug_menu": "打开调试菜单",
+  "screen.hello-mod.debug_menu.title": "调试功能菜单",
+  "screen.hello-mod.debug_menu.health_hud": "实体血量显示: %s",
+  "screen.hello-mod.debug_menu.item_hud": "手持物品显示: %s",
   "enchantment.hello-mod.swift_throw": "迅投"
 }

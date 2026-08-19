@@ -4,7 +4,9 @@
   "death.attack.hello-mod.sharp_potion": "%1$s was shattered by a sharp potion",
   "death.attack.hello-mod.power_potion": "%1$s was obliterated by a powerful potion",
   "category.hello-mod.hud": "Better Enchanted HUD",
-  "key.hello-mod.toggle_health_hud": "Toggle Entity Health HUD",
-  "key.hello-mod.toggle_item_hud": "Toggle Held Item Display",
+  "key.hello-mod.open_debug_menu": "Open Debug Menu",
+  "screen.hello-mod.debug_menu.title": "Debug Menu",
+  "screen.hello-mod.debug_menu.health_hud": "Entity Health HUD: %s",
+  "screen.hello-mod.debug_menu.item_hud": "Held Item Display: %s",
   "enchantment.hello-mod.swift_throw": "Swift Throw"
 }

@@ -25,28 +25,25 @@ public class HelloModClient implements ClientModInitializer {
     /** 手持物品显示是否开启 */
     private static boolean itemHudEnabled = true;
 
-    /** 切换实体血量 HUD 的按键，默认无绑定 */
-    private static KeyBinding toggleHealthHudKey;
+    /** 打开调试菜单的按键，默认无绑定 */
+    private static KeyBinding openDebugMenuKey;
 
-    /** 切换手持物品显示的按键，默认无绑定 */
-    private static KeyBinding toggleItemHudKey;
+    public static boolean isItemHudEnabled() {
+        return itemHudEnabled;
+    }
+
+    public static void toggleItemHud() {
+        itemHudEnabled = !itemHudEnabled;
+    }
 
     @Override
     public void onInitializeClient() {
         // 注册无限附魔冷却客户端同步
         InfinityCooldownClientState.register();
 
-        // 注册按键绑定: 切换实体血量显示（默认无绑定）
-        toggleHealthHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.hello-mod.toggle_health_hud", // 翻译键
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN, // 默认无绑定，玩家可自行设置
-                "category.hello-mod.hud" // 按键分类
-        ));
-
-        // 注册按键绑定: 切换手持物品显示（默认无绑定）
-        toggleItemHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.hello-mod.toggle_item_hud", // 翻译键
+        // 注册按键绑定: 打开调试功能菜单（默认无绑定）
+        openDebugMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.hello-mod.open_debug_menu", // 翻译键
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN, // 默认无绑定，玩家可自行设置
                 "category.hello-mod.hud" // 按键分类
@@ -54,25 +51,8 @@ public class HelloModClient implements ClientModInitializer {
 
         // 监听按键事件
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (toggleHealthHudKey.wasPressed()) {
-                EntityHealthHud.toggle();
-                if (client.player != null) {
-                    String status = EntityHealthHud.isEnabled() ? "§a开启" : "§c关闭";
-                    client.player.sendMessage(
-                            Text.literal("§7[实体血量HUD] " + status),
-                            true // actionBar
-                    );
-                }
-            }
-            while (toggleItemHudKey.wasPressed()) {
-                itemHudEnabled = !itemHudEnabled;
-                if (client.player != null) {
-                    String status = itemHudEnabled ? "§a开启" : "§c关闭";
-                    client.player.sendMessage(
-                            Text.literal("§7[手持物品显示] " + status),
-                            true // actionBar
-                    );
-                }
+            while (openDebugMenuKey.wasPressed()) {
+                client.setScreen(new DebugMenuScreen());
             }
         });
 
