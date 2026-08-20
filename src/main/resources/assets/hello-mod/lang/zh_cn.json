@@ -28,5 +28,7 @@
   "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_throw": "模式: 投掷",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.switch": "手持时左键切换模式",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.splash_effects": "喷溅效果:",
-  "item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects": "效果云:"
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects": "效果云:",
+  "advancements.hello-mod.ultimate_golden_apple.title": "终极金苹果",
+  "advancements.hello-mod.ultimate_golden_apple.description": "使超级附魔金苹果拥有所有有效附魔且均为最高等级"
 }

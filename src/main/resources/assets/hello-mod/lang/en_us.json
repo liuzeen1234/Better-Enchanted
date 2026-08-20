@@ -28,5 +28,7 @@
   "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_throw": "Mode: Throw",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.switch": "Left-click to switch mode",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.splash_effects": "Splash Effects:",
-  "item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects": "Effect Cloud:"
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects": "Effect Cloud:",
+  "advancements.hello-mod.ultimate_golden_apple.title": "Ultimate Golden Apple",
+  "advancements.hello-mod.ultimate_golden_apple.description": "Have a Super Enchanted Golden Apple with all valid enchantments at max level"
 }
