@@ -1,0 +1,7 @@
+{
+  "exhaustion": 0.0,
+  "message_id": "hello-mod.ultimate_apple",
+  "scaling": "never",
+  "effects": "hurt",
+  "death_message_type": "default"
+}

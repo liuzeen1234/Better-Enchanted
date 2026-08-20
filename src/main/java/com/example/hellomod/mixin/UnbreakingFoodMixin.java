@@ -1,6 +1,7 @@
 package com.example.hellomod.mixin;
 
 import com.example.hellomod.HelloMod;
+import com.example.hellomod.item.ModItems;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,6 +26,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * 实现方式：在 eatFood 的 HEAD 记录食用前数量，
  * 在 RETURN 时如果耐久检查通过，恢复1个（即抵消这一次消耗），
  * 并通过发送 slot 更新包强制同步客户端。
+ *
+ * 终极附魔金苹果特殊规则：耐久判定成功不消耗 + 进入3s(60tick)冷却。
  */
 @Mixin(PlayerEntity.class)
 public abstract class UnbreakingFoodMixin {
@@ -35,18 +38,23 @@ public abstract class UnbreakingFoodMixin {
     @Unique
     private int hellomod_unbreakingLevel = 0;
 
+    @Unique
+    private boolean hellomod_isUltimateApple = false;
+
     @Inject(method = "eatFood", at = @At("HEAD"))
     private void onEatFoodHead(World world, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
         if (world.isClient()) {
             hellomod_unbreakingLevel = 0;
+            hellomod_isUltimateApple = false;
             return;
         }
 
         hellomod_unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
+        hellomod_isUltimateApple = stack.getItem() == ModItems.ULTIMATE_ENCHANTED_GOLDEN_APPLE;
         if (hellomod_unbreakingLevel > 0) {
             hellomod_countBeforeEat = stack.getCount();
-            HelloMod.LOGGER.info("[UnbreakingDebug] HEAD: count before eat = {}, unbreaking level = {}",
-                    hellomod_countBeforeEat, hellomod_unbreakingLevel);
+            HelloMod.LOGGER.info("[UnbreakingDebug] HEAD: count before eat = {}, unbreaking level = {}, isUltimate = {}",
+                    hellomod_countBeforeEat, hellomod_unbreakingLevel, hellomod_isUltimateApple);
         }
     }
 
@@ -72,14 +80,15 @@ public abstract class UnbreakingFoodMixin {
             HelloMod.LOGGER.info("[UnbreakingDebug] Unbreaking triggered! count: {} -> {}",
                     countAfterEat, newCount);
 
+            // 终极附魔金苹果：耐久判定成功时进入3s(60tick)冷却
+            if (hellomod_isUltimateApple) {
+                player.getItemCooldownManager().set(ModItems.ULTIMATE_ENCHANTED_GOLDEN_APPLE, 60);
+                HelloMod.LOGGER.info("[UnbreakingDebug] Ultimate apple: applied 3s cooldown");
+            }
+
             // 强制同步客户端：发送 slot 更新包
             if (player instanceof ServerPlayerEntity serverPlayer) {
                 int selectedSlot = serverPlayer.getInventory().selectedSlot;
-                // ScreenHandlerSlotUpdateS2CPacket 参数：
-                // syncId (-2 表示直接更新玩家背包 slot，不经过 screen handler)
-                // revision (0)
-                // slot index (快捷栏 slot = 36 + selectedSlot)
-                // stack
                 serverPlayer.networkHandler.sendPacket(
                         new ScreenHandlerSlotUpdateS2CPacket(-2, 0, selectedSlot, resultStack.copy())
                 );
@@ -92,5 +101,6 @@ public abstract class UnbreakingFoodMixin {
         // 重置状态
         hellomod_countBeforeEat = -1;
         hellomod_unbreakingLevel = 0;
+        hellomod_isUltimateApple = false;
     }
 }

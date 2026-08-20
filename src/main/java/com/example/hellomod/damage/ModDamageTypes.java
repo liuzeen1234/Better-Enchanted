@@ -37,4 +37,14 @@ public class ModDamageTypes {
             RegistryKeys.DAMAGE_TYPE,
             new Identifier(HelloMod.MOD_ID, "power_potion")
     );
+
+    /**
+     * 终极附魔金苹果真实伤害类型的注册键。
+     * 对应 data/hello-mod/damage_type/ultimate_apple.json
+     * bypasses_armor + bypasses_magic = 真实伤害（无视护甲和附魔保护）
+     */
+    public static final RegistryKey<DamageType> ULTIMATE_APPLE = RegistryKey.of(
+            RegistryKeys.DAMAGE_TYPE,
+            new Identifier(HelloMod.MOD_ID, "ultimate_apple")
+    );
 }

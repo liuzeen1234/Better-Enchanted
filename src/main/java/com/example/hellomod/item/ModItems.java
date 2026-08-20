@@ -23,6 +23,14 @@ public class ModItems {
                     .rarity(Rarity.EPIC))
     );
 
+    public static final Item ULTIMATE_ENCHANTED_GOLDEN_APPLE = Registry.register(
+            Registries.ITEM,
+            new Identifier(HelloMod.MOD_ID, "ultimate_enchanted_golden_apple"),
+            new UltimateEnchantedGoldenAppleItem(new FabricItemSettings()
+                    .maxCount(64)
+                    .rarity(Rarity.EPIC))
+    );
+
     /**
      * 在 ModInitializer 中调用以触发静态初始化完成注册。
      */
@@ -30,11 +38,13 @@ public class ModItems {
         // 将物品添加到食物创造模式标签页
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> {
             entries.add(SUPER_ENCHANTED_GOLDEN_APPLE);
+            entries.add(ULTIMATE_ENCHANTED_GOLDEN_APPLE);
         });
 
         // 也添加到战斗标签页（因为有投掷模式）
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(entries -> {
             entries.add(SUPER_ENCHANTED_GOLDEN_APPLE);
+            entries.add(ULTIMATE_ENCHANTED_GOLDEN_APPLE);
         });
 
         HelloMod.LOGGER.info("[ModItems] Registered custom items.");

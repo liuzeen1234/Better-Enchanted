@@ -30,5 +30,17 @@
   "item.hello-mod.super_enchanted_golden_apple.tooltip.splash_effects": "喷溅效果:",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects": "效果云:",
   "advancements.hello-mod.ultimate_golden_apple.title": "终极金苹果",
-  "advancements.hello-mod.ultimate_golden_apple.description": "使超级附魔金苹果拥有所有有效附魔且均为最高等级"
+  "advancements.hello-mod.ultimate_golden_apple.description": "使超级附魔金苹果拥有所有有效附魔且均为最高等级",
+  "item.hello-mod.ultimate_enchanted_golden_apple": "终极附魔金苹果",
+  "item.hello-mod.ultimate_enchanted_golden_apple.throw": "投掷型终极附魔金苹果",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.mode_eat": "模式: 食用",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.mode_throw": "模式: 投掷",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.switch": "手持时左键切换模式",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.eat_effects": "食用效果:",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.throw_effects": "投掷效果:",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.throw_range": "  范围: 4格",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.throw_hostile": "  敌对生物: 100点真实伤害",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.throw_friendly": "  友好生物/玩家: 生命恢复 V (1:00)",
+  "death.attack.hello-mod.ultimate_apple": "%1$s被终极附魔金苹果消灭了",
+  "death.attack.hello-mod.ultimate_apple.player": "%1$s被%2$s的终极附魔金苹果消灭了"
 }

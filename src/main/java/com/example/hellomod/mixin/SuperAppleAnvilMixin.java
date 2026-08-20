@@ -67,7 +67,8 @@ public abstract class SuperAppleAnvilMixin extends ForgingScreenHandler {
         hello_mod$isSuperAppleOperation = false;
 
         ItemStack input = this.input.getStack(0);
-        if (!input.isEmpty() && input.getItem() == ModItems.SUPER_ENCHANTED_GOLDEN_APPLE) {
+        if (!input.isEmpty() && (input.getItem() == ModItems.SUPER_ENCHANTED_GOLDEN_APPLE
+                || input.getItem() == ModItems.ULTIMATE_ENCHANTED_GOLDEN_APPLE)) {
             // 获取玩家并临时设为创造模式
             if (this.player != null) {
                 hello_mod$originalCreativeMode = this.player.getAbilities().creativeMode;
@@ -79,7 +80,7 @@ public abstract class SuperAppleAnvilMixin extends ForgingScreenHandler {
 
     /**
      * 在 updateResult 结束后，恢复玩家的创造模式状态，
-     * 并将超级金苹果的输出 RepairCost 锁定为 0。
+     * 并将超级/终极金苹果的输出 RepairCost 锁定为 0。
      */
     @Inject(method = "updateResult", at = @At("TAIL"))
     private void afterUpdateResult(CallbackInfo ci) {
@@ -90,7 +91,8 @@ public abstract class SuperAppleAnvilMixin extends ForgingScreenHandler {
 
             // 锁定输出物品的 RepairCost 为 0
             ItemStack output = this.output.getStack(0);
-            if (!output.isEmpty() && output.getItem() == ModItems.SUPER_ENCHANTED_GOLDEN_APPLE) {
+            if (!output.isEmpty() && (output.getItem() == ModItems.SUPER_ENCHANTED_GOLDEN_APPLE
+                    || output.getItem() == ModItems.ULTIMATE_ENCHANTED_GOLDEN_APPLE)) {
                 output.setRepairCost(0);
             }
         }
@@ -110,7 +112,8 @@ public abstract class SuperAppleAnvilMixin extends ForgingScreenHandler {
     }
 
     /**
-     * 授予"终极金苹果"成就并给予 1000 经验等级。
+     * 授予"终极金苹果"成就。
+     * 奖励（经验+终极金苹果）由 AdvancementRewardMixin 在进度完成时统一处理。
      */
     private void grantAdvancement(ServerPlayerEntity player) {
         AdvancementEntry advancement = player.getServer().getAdvancementLoader()
@@ -130,9 +133,6 @@ public abstract class SuperAppleAnvilMixin extends ForgingScreenHandler {
         for (String criterion : progress.getUnobtainedCriteria()) {
             player.getAdvancementTracker().grantCriterion(advancement, criterion);
         }
-
-        // 给予 1000 经验等级
-        player.addExperienceLevels(1000);
 
         HelloMod.LOGGER.info("[UltimateApple] Player {} achieved Ultimate Golden Apple!", player.getName().getString());
     }

@@ -24,6 +24,16 @@ public class ModEntities {
                     .build()
     );
 
+    public static final EntityType<UltimateGoldenAppleEntity> ULTIMATE_GOLDEN_APPLE_ENTITY = Registry.register(
+            Registries.ENTITY_TYPE,
+            new Identifier(HelloMod.MOD_ID, "ultimate_golden_apple"),
+            FabricEntityTypeBuilder.<UltimateGoldenAppleEntity>create(SpawnGroup.MISC, UltimateGoldenAppleEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.25f, 0.25f))
+                    .trackRangeChunks(4)
+                    .trackedUpdateRate(10)
+                    .build()
+    );
+
     public static void register() {
         HelloMod.LOGGER.info("[ModEntities] Registered custom entities.");
     }

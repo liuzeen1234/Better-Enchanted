@@ -30,5 +30,17 @@
   "item.hello-mod.super_enchanted_golden_apple.tooltip.splash_effects": "Splash Effects:",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects": "Effect Cloud:",
   "advancements.hello-mod.ultimate_golden_apple.title": "Ultimate Golden Apple",
-  "advancements.hello-mod.ultimate_golden_apple.description": "Have a Super Enchanted Golden Apple with all valid enchantments at max level"
+  "advancements.hello-mod.ultimate_golden_apple.description": "Have a Super Enchanted Golden Apple with all valid enchantments at max level",
+  "item.hello-mod.ultimate_enchanted_golden_apple": "Ultimate Enchanted Golden Apple",
+  "item.hello-mod.ultimate_enchanted_golden_apple.throw": "Throwable Ultimate Enchanted Golden Apple",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.mode_eat": "Mode: Eat",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.mode_throw": "Mode: Throw",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.switch": "Left-click to switch mode",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.eat_effects": "Eat Effects:",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.throw_effects": "Throw Effects:",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.throw_range": "  Range: 4 blocks",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.throw_hostile": "  Hostile mobs: 100 true damage",
+  "item.hello-mod.ultimate_enchanted_golden_apple.tooltip.throw_friendly": "  Friendly/Players: Regeneration V (1:00)",
+  "death.attack.hello-mod.ultimate_apple": "%1$s was annihilated by an Ultimate Enchanted Golden Apple",
+  "death.attack.hello-mod.ultimate_apple.player": "%1$s was annihilated by %2$s's Ultimate Enchanted Golden Apple"
 }

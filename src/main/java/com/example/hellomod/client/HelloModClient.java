@@ -63,6 +63,9 @@ public class HelloModClient implements ClientModInitializer {
         // 避免因投掷物速度过快导致的贴图显示问题 (MC-128812)
         EntityRendererRegistry.register(ModEntities.SUPER_GOLDEN_APPLE_ENTITY, EmptyEntityRenderer::new);
 
+        // 注册终极附魔金苹果投掷实体的渲染器（同样使用空渲染器）
+        EntityRendererRegistry.register(ModEntities.ULTIMATE_GOLDEN_APPLE_ENTITY, EmptyEntityRenderer::new);
+
         // 注册按键绑定: 打开调试功能菜单（默认无绑定）
         openDebugMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.hello-mod.open_debug_menu", // 翻译键

@@ -1,6 +1,7 @@
 package com.example.hellomod.mixin.client;
 
 import com.example.hellomod.item.SuperEnchantedGoldenAppleItem;
+import com.example.hellomod.item.UltimateEnchantedGoldenAppleItem;
 import com.example.hellomod.item.ModItems;
 import com.example.hellomod.network.SuperAppleModeSwitchC2SPacket;
 import net.minecraft.client.MinecraftClient;
@@ -14,11 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * 客户端 Mixin：拦截左键攻击，当主手持有超级附魔金苹果时切换模式。
+ * 客户端 Mixin：拦截左键攻击，当主手持有超级/终极附魔金苹果时切换模式。
  * 
  * 切换规则：
- * - 手持超级附魔金苹果时左键 -> 切换模式
- * - 切换后 5 tick 冷却期间无效果
+ * - 手持超级附魔金苹果时左键 -> 切换模式（5 tick 冷却）
+ * - 手持终极附魔金苹果时左键 -> 切换模式（2 tick 冷却）
  */
 @Mixin(MinecraftClient.class)
 public abstract class SuperAppleAttackMixin {
@@ -47,23 +48,30 @@ public abstract class SuperAppleAttackMixin {
         if (player == null) return;
 
         ItemStack mainHand = player.getMainHandStack();
-        if (mainHand.isEmpty() || mainHand.getItem() != ModItems.SUPER_ENCHANTED_GOLDEN_APPLE) {
-            return;
-        }
+        if (mainHand.isEmpty()) return;
 
-        // 冷却中，取消事件
-        if (hellomod_switchCooldown > 0) {
+        if (mainHand.getItem() == ModItems.SUPER_ENCHANTED_GOLDEN_APPLE) {
+            // 超级附魔金苹果：5 tick 冷却
+            if (hellomod_switchCooldown > 0) {
+                cir.setReturnValue(false);
+                return;
+            }
+
+            SuperEnchantedGoldenAppleItem.toggleMode(mainHand);
+            hellomod_switchCooldown = 5;
+            SuperAppleModeSwitchC2SPacket.send();
             cir.setReturnValue(false);
-            return;
+        } else if (mainHand.getItem() == ModItems.ULTIMATE_ENCHANTED_GOLDEN_APPLE) {
+            // 终极附魔金苹果：2 tick 冷却
+            if (hellomod_switchCooldown > 0) {
+                cir.setReturnValue(false);
+                return;
+            }
+
+            UltimateEnchantedGoldenAppleItem.toggleMode(mainHand);
+            hellomod_switchCooldown = 2;
+            SuperAppleModeSwitchC2SPacket.sendUltimate();
+            cir.setReturnValue(false);
         }
-
-        // 切换模式（客户端立即生效 + 发包到服务端同步）
-        SuperEnchantedGoldenAppleItem.toggleMode(mainHand);
-        hellomod_switchCooldown = 5; // 5 tick 冷却
-
-        // 发送 C2S 包同步到服务端
-        SuperAppleModeSwitchC2SPacket.send();
-
-        cir.setReturnValue(false);
     }
 }
