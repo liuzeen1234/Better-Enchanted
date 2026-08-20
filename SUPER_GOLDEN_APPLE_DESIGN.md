@@ -262,7 +262,7 @@
 13. ✅ **合成自动附魔** — `SuperAppleCraftingMixin` 合成产出时自动添加迅投 25 + 药水效果数据
 14. ✅ **无限附魔冷却** — `InfinityCooldownManager` 自定义冷却管理（基于玩家 UUID + NBT 标记 `InfinityMarked`），支持快速装填减免
 15. ⬜ **穿透/忠诚** — 穿透（`PiercingPotionMixin`）和忠诚（`LoyaltyPotionMixin` + `LoyaltyCollisionMixin`）当前仅对 `PotionEntity` 生效，超级附魔金苹果实体的穿透/返回逻辑尚未实现
-16. ✅ **铁砧惩罚锁定** — `SuperAppleAnvilMixin` 将超级附魔金苹果的 RepairCost 锁定为 10，防止多次铁砧操作后惩罚指数增长
+16. ✅ **铁砧惩罚锁定** — `SuperAppleAnvilMixin` 将超级附魔金苹果的 RepairCost 锁定为 10，防止多次铁砧操作后惩罚指数增长；同时无视原版 "Too Expensive" 39级上限，通过临时设置创造模式标记绕过检查
 17. ✅ **投掷时药水数据传递** — `writeEnchantDataToEntity` 将物品 NBT 中的 SplashEffects/CloudEffects/SplashInstantCount/CloudInstantCount 完整复制到投掷实体
 
 ---
@@ -278,12 +278,15 @@
 | `entity/SuperGoldenAppleEntity.java` | 投掷实体：飞行、碰撞、喷溅效果、效果云生成 |
 | `entity/ModEntities.java` | 实体注册 |
 | `mixin/SuperAppleCraftingMixin.java` | 合成注入：添加迅投 25 + 读取药水数据写入 NBT |
-| `mixin/SuperAppleAnvilMixin.java` | 铁砧注入：锁定 RepairCost |
+| `mixin/SuperAppleAnvilMixin.java` | 铁砧注入：无视39级上限 + 锁定 RepairCost + 进度检测 |
 | `mixin/client/SuperAppleAttackMixin.java` | 客户端左键拦截：模式切换 + 5 tick 冷却 |
 | `network/SuperAppleModeSwitchC2SPacket.java` | C2S 网络包：模式切换同步 |
 | `enchantment/ModEnchantments.java` | 迅投附魔注册 |
 | `enchantment/SwiftThrowEnchantment.java` | 迅投附魔实现 |
 | `enchantment/InfinityCooldownManager.java` | 无限附魔冷却管理 |
+| `client/EmptyEntityRenderer.java` | 空渲染器：投掷实体不可见（避免高速视觉bug） |
+| `mixin/AdvancementRewardMixin.java` | 进度完成时发放奖励（终极金苹果+1000经验等级） |
+| `advancement/UltimateAppleChecker.java` | 14种附魔满级判定工具类 |
 | `resources/data/hello-mod/recipes/super_enchanted_golden_apple.json` | 合成配方 |
 | `resources/assets/hello-mod/models/item/super_enchanted_golden_apple.json` | 物品模型 |
 | `resources/assets/hello-mod/textures/item/super_enchanted_golden_apple.png` | 物品贴图 |

@@ -108,15 +108,25 @@
 
 ---
 
-## 五、进度奖励
+## 五、铁砧兼容
 
-- 玩家完成已有自定义进度 "终极附魔金苹果" 时，**额外给予**玩家1个终极附魔金苹果（不替换手上物品）
-- 给予的物品自带：效率9、耐久10、迅投25、无限1
-- 通过 Fabric 进度完成事件监听实现
+- **无视 "Too Expensive" 39级上限**：与超级版共享 `SuperAppleAnvilMixin` 机制，始终可在铁砧上操作
+- RepairCost 锁定为 10，防止惩罚指数增长
+- 可通过铁砧附加额外附魔（附魔列表与超级版相同）
 
 ---
 
-## 六、Tooltip 显示
+## 六、进度奖励
+
+- 玩家完成已有自定义进度 "终极附魔金苹果" 时，**额外给予**玩家1个终极附魔金苹果（不替换手上物品）
+- 给予的物品自带：效率9、耐久10、迅投25、无限1
+- 触发链路：`SuperAppleAnvilMixin`（取出物品时检测14种附魔满级 → 授予进度）→ `AdvancementRewardMixin`（进度完成时发放奖励）
+- 奖励额外给予 1000 经验等级
+- 如果背包已满，物品掉落在地面
+
+---
+
+## 七、Tooltip 显示
 
 ```
 终极附魔金苹果
@@ -139,7 +149,7 @@
 
 ---
 
-## 七、与超级附魔金苹果的区别对比
+## 八、与超级附魔金苹果的区别对比
 
 | 对比项 | 超级附魔金苹果 | 终极附魔金苹果 |
 |--------|---------------|---------------|
@@ -154,7 +164,7 @@
 
 ---
 
-## 八、技术实现计划
+## 九、技术实现计划
 
 | 步骤 | 内容 |
 |------|------|
@@ -171,7 +181,7 @@
 
 ---
 
-## 九、实现文件清单（预计）
+## 十、实现文件清单（预计）
 
 | 文件 | 用途 |
 |------|------|
@@ -179,9 +189,12 @@
 | `entity/UltimateGoldenAppleEntity.java` | 投掷实体：飞行、碰撞、4格检测、真实伤害、治疗、附魔效果 |
 | `item/ModItems.java` | 新增物品注册 |
 | `entity/ModEntities.java` | 新增实体注册 |
+| `mixin/SuperAppleAnvilMixin.java` | 铁砧兼容：无视39级上限 + RepairCost锁定 + 进度触发 |
+| `mixin/AdvancementRewardMixin.java` | 进度完成时发放奖励（终极金苹果 + 1000经验等级） |
+| `advancement/UltimateAppleChecker.java` | 14种附魔满级判定工具类 |
 | `mixin/client/SuperAppleAttackMixin.java` | 修改：支持终极版2tick冷却切换 |
 | `network/SuperAppleModeSwitchC2SPacket.java` | 修改：支持终极版模式同步 |
-| `advancement/UltimateAppleAdvancementListener.java` | 新增：进度完成监听，给予物品 |
+| `client/EmptyEntityRenderer.java` | 空渲染器：投掷实体不可见（避免高速视觉bug） |
 | `resources/assets/hello-mod/models/item/ultimate_enchanted_golden_apple.json` | 物品模型 |
 | `resources/assets/hello-mod/lang/zh_cn.json` | 中文翻译（新增键） |
 | `resources/assets/hello-mod/lang/en_us.json` | 英文翻译（新增键） |
