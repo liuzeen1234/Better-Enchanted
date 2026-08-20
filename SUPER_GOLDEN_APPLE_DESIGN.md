@@ -27,11 +27,24 @@
 ```
 
 - 四角：金块 ×4
-- 上、下中：滞留型药水 ×2（任意药水类型均可）
-- 左、右中：喷溅型药水 ×2（任意药水类型均可）
+- 上、下中：滞留型药水 ×2（任意药水类型均可，类型决定效果云给予的额外效果）
+- 左、右中：喷溅型药水 ×2（任意药水类型均可，类型决定喷溅给予的额外效果）
 - 正中心：金苹果 ×1
 
-产出：超级附魔金苹果 ×1（自带迅投 25 附魔）
+产出：超级附魔金苹果 ×1（自带迅投 25 附魔，NBT 中存储药水效果数据）
+
+### 合成时药水效果存储规则
+
+合成时读取配方中喷溅型药水和滞留型药水的药水效果，按以下规则合并后存入产物 NBT：
+
+**持续性效果合并规则：**
+- 两瓶药水类型相同、等级相同 → 持续时间叠加
+- 两瓶药水类型相同、等级不同 → 只保留高等级的效果（时间取高等级那瓶的时间）
+- 两瓶药水类型不同 → 两个效果都保留，各自独立
+
+**瞬时效果（如治疗、伤害）：**
+- 不受上述合并规则影响
+- 每瓶药水的瞬时效果单独处理一次（即两瓶瞬时治疗 = 触发两次治疗）
 
 ---
 
@@ -52,14 +65,14 @@
 
 - 右键投掷
 - 初速度与原版喷溅型药水初速度相同
-- 投掷后消耗 1 个（受附魔影响，见第六节）
+- 投掷后消耗 1 个（受附魔影响，见第七节）
 
 ### 落地后行为
 
-1. **先触发喷溅效果** — 范围内所有实体获得 buff，距离越远持续时间越短
-2. **再生成效果云** — 在落点生成 AreaEffectCloud，效果同上
+1. **先触发喷溅效果** — 范围内所有实体获得基础 buff + 喷溅型药水额外效果，距离越远持续时间/效果强度越低
+2. **再生成效果云** — 在落点生成 AreaEffectCloud，效果为基础 buff + 滞留型药水额外效果
 
-### 给予的效果
+### 基础效果（固定，始终给予）
 
 | 效果 | 等级 | 最大持续时间（直接命中） |
 |------|------|--------------------------|
@@ -68,18 +81,27 @@
 | 抗性提升 (Resistance) | I | 5 分钟 |
 | 抗火 (Fire Resistance) | I | 5 分钟 |
 
-### 喷溅时间衰减
+### 喷溅型药水额外效果
+
+由合成时使用的喷溅型药水决定，随喷溅一起作用于范围内实体。
+
+### 喷溅时间/强度衰减
 
 参考 MC 1.20.4 喷溅型药水规则：
-- 直接命中实体：100% 持续时间
-- 溅射范围内实体：持续时间 = 最大时间 × (1 - 距离/4)
+- 直接命中实体：100% 持续时间 / 100% 效果强度
+- 溅射范围内实体：
+  - 持续性效果：持续时间 = 最大时间 × (1 - 距离/4)
+  - 瞬时效果（治疗/伤害）：效果强度按距离衰减，参考原版 MC 1.20.4 喷溅型药水对瞬时效果的处理规则
 
 ### 效果云规则
 
 参考 MC 1.20.4 滞留型药水的 AreaEffectCloud 机制：
+- 效果云持续时间固定（30秒）
+- 效果云给予的效果 = 基础效果 + 滞留型药水额外效果
 - 实体进入云中时获得效果
 - 每次给予效果后，云的 duration 缩短（durationOnUse）
 - 云中获得的效果持续时间 = 云剩余时间比例 × 最大效果时间
+- 瞬时效果：参考原版 MC 1.20.4 滞留型药水对瞬时效果的 AreaEffectCloud 处理规则
 
 ---
 
@@ -89,9 +111,13 @@
 
 - 长按右键食用
 - 食用时间：32 tick（1.6秒），与 MC 1.20.4 附魔金苹果相同
-- 食用后消耗 1 个（受附魔影响，见第六节）
+- 食用后消耗 1 个（受附魔影响，见第七节）
 
 ### 食用后给予效果
+
+食用效果 = 基础效果 + 喷溅型药水效果 + 滞留型药水效果（全部给予食用者）
+
+**基础效果（固定）：**
 
 | 效果 | 等级 | 持续时间 |
 |------|------|----------|
@@ -100,9 +126,39 @@
 | 抗性提升 (Resistance) | I | 5 分钟 |
 | 抗火 (Fire Resistance) | I | 5 分钟 |
 
+**药水额外效果：**
+- 喷溅型药水带来的效果：直接给予食用者（100% 持续时间）
+- 滞留型药水带来的效果：直接给予食用者（100% 持续时间）
+- 瞬时效果：直接触发（每瓶药水的瞬时效果各触发一次）
+
 ---
 
-## 六、附魔生效规则
+## 六、物品 Tooltip
+
+合成后的超级附魔金苹果在物品描述中显示包含的药水效果：
+
+```
+超级附魔金苹果
+[迅投 XXV]
+模式: 食用 / 投掷
+
+喷溅效果:
+  力量 II (1:30)
+  速度 I (3:00)
+
+效果云:
+  治疗 II
+  抗火 I (3:00)
+```
+
+- "喷溅效果" 下列出喷溅型药水带来的额外效果
+- "效果云" 下列出滞留型药水带来的额外效果
+- 瞬时效果不显示时间
+- 持续效果显示 "等级 (分:秒)" 格式
+
+---
+
+## 七、附魔生效规则
 
 ### 自带附魔
 
@@ -150,7 +206,7 @@
 
 ---
 
-## 七、消耗规则总结
+## 八、消耗规则总结
 
 | 模式 | 默认消耗 | 耐久附魔影响 | 无限附魔影响 | 忠诚附魔影响 |
 |------|----------|--------------|--------------|--------------|
@@ -159,15 +215,50 @@
 
 ---
 
-## 八、技术实现要点
+## 九、NBT 数据结构
+
+合成后物品 NBT 中存储的药水效果数据：
+
+```nbt
+{
+  SuperAppleMode: "eat",           // 当前模式
+  SplashEffects: [                 // 喷溅型药水效果列表（合并后）
+    {Id: "minecraft:strength", Amplifier: 1, Duration: 1800},
+    {Id: "minecraft:speed", Amplifier: 0, Duration: 3600}
+  ],
+  CloudEffects: [                  // 滞留型药水效果列表（合并后）
+    {Id: "minecraft:instant_health", Amplifier: 1, Duration: 0, Instant: true},
+    {Id: "minecraft:fire_resistance", Amplifier: 0, Duration: 3600}
+  ],
+  SplashInstantCount: [            // 瞬时效果触发次数（喷溅）
+    {Id: "minecraft:instant_health", Amplifier: 1, Count: 2}
+  ],
+  CloudInstantCount: [             // 瞬时效果触发次数（效果云）
+    {Id: "minecraft:instant_health", Amplifier: 1, Count: 2}
+  ]
+}
+```
+
+说明：
+- `SplashEffects` / `CloudEffects`：合并后的持续性效果列表
+- `SplashInstantCount` / `CloudInstantCount`：瞬时效果单独记录触发次数（每瓶药水各触发一次，两瓶相同瞬时效果 = Count 2）
+
+---
+
+## 十、技术实现要点
 
 1. **自定义物品** — `SuperEnchantedGoldenAppleItem` 注册于 `ModItems`，合成配方 JSON，物品模型，贴图，语言文件
-2. **投掷逻辑** — `SuperGoldenAppleEntity`（继承 `ThrownItemEntity`）处理投掷飞行、碰撞、喷溅和效果云生成
-3. **食用逻辑** — 食用时的附魔效果由 `PlayerEatFoodMixin`（锋利/击退/火焰附加/冰霜行者）和 `UnbreakingFoodMixin`（耐久）处理
-4. **效率加速** — `EfficientEatingMixin` 注入 `Item.getMaxUseTime()`，带效率附魔的食物减少食用时间
-5. **左键切换** — `SuperAppleAttackMixin`（客户端）拦截 `MinecraftClient.doAttack`，判断主手为超级附魔金苹果时切换模式并发送 `SuperAppleModeSwitchC2SPacket` 同步服务端
-6. **5 tick 冷却** — 客户端 Mixin 内部计数器，冷却期间屏蔽左键
-7. **名称动态变化** — 根据 NBT `SuperAppleMode` 标记返回不同的翻译键
-8. **合成自动附魔** — `SuperAppleCraftingMixin` 注入 `CraftingScreenHandler.updateResult`，合成产出时自动添加迅投 25
-9. **无限附魔冷却** — `InfinityCooldownManager` 自定义冷却管理（基于玩家 UUID + NBT 标记 `InfinityMarked`），支持快速装填减免
-10. **穿透/忠诚** — 穿透（`PiercingPotionMixin`）和忠诚（`LoyaltyPotionMixin` + `LoyaltyCollisionMixin`）当前仅对 `PotionEntity` 生效，超级附魔金苹果实体的穿透/返回逻辑尚未实现
+2. **合成时药水数据提取** — `SuperAppleCraftingMixin` 注入 `CraftingScreenHandler.updateResult`，读取合成格中喷溅型/滞留型药水的 `Potion` NBT，按合并规则处理后写入产物 NBT
+3. **投掷逻辑** — `SuperGoldenAppleEntity`（继承 `ThrownItemEntity`）处理投掷飞行、碰撞、喷溅和效果云生成，从 NBT 读取 `SplashEffects` 和 `CloudEffects` 应用
+4. **喷溅效果** — 基础效果 + SplashEffects，持续性效果按距离衰减时间，瞬时效果按距离衰减强度（参考原版规则）
+5. **效果云生成** — 基础效果 + CloudEffects，效果云持续时间固定 30s，瞬时效果参考原版滞留型药水的 AreaEffectCloud 行为
+6. **食用逻辑** — 食用时给予：基础效果 + SplashEffects + CloudEffects（全部 100% 持续时间，瞬时效果直接触发对应次数）
+7. **食用附魔效果** — 由 `PlayerEatFoodMixin`（锋利/击退/火焰附加/冰霜行者）和 `UnbreakingFoodMixin`（耐久）处理
+8. **效率加速** — `EfficientEatingMixin` 注入 `Item.getMaxUseTime()`，带效率附魔的食物减少食用时间
+9. **左键切换** — `SuperAppleAttackMixin`（客户端）拦截 `MinecraftClient.doAttack`，判断主手为超级附魔金苹果时切换模式并发送 `SuperAppleModeSwitchC2SPacket` 同步服务端
+10. **5 tick 冷却** — 客户端 Mixin 内部计数器，冷却期间屏蔽左键
+11. **名称动态变化** — 根据 NBT `SuperAppleMode` 标记返回不同的翻译键
+12. **Tooltip 显示** — `appendTooltip` 中读取 NBT 的 `SplashEffects` 和 `CloudEffects`，格式化显示药水效果名称、等级和持续时间
+13. **合成自动附魔** — `SuperAppleCraftingMixin` 合成产出时自动添加迅投 25 + 药水效果数据
+14. **无限附魔冷却** — `InfinityCooldownManager` 自定义冷却管理（基于玩家 UUID + NBT 标记 `InfinityMarked`），支持快速装填减免
+15. **穿透/忠诚** — 穿透（`PiercingPotionMixin`）和忠诚（`LoyaltyPotionMixin` + `LoyaltyCollisionMixin`）当前仅对 `PotionEntity` 生效，超级附魔金苹果实体的穿透/返回逻辑尚未实现
