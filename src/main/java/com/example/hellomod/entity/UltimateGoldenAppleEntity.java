@@ -218,6 +218,15 @@ public class UltimateGoldenAppleEntity extends ThrownItemEntity {
             if (entity instanceof Monster) {
                 // 敌对生物：100点真实伤害，来源为投掷者
                 entity.damage(UltimateAppleDamageSource.create(world, owner), 100.0f);
+
+                // 无条件在敌对生物处召唤闪电
+                if (world instanceof ServerWorld serverWorld) {
+                    LightningEntity lightning = EntityType.LIGHTNING_BOLT.create(world);
+                    if (lightning != null) {
+                        lightning.refreshPositionAfterTeleport(entity.getX(), entity.getY(), entity.getZ());
+                        serverWorld.spawnEntity(lightning);
+                    }
+                }
             } else {
                 // 友好生物/玩家（包括投掷者自己）：生命恢复V(60s)
                 entity.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 1200, 4));
