@@ -11,30 +11,44 @@ import net.minecraft.entity.EquipmentSlot;
  * 每级增加50%的原始初速度。
  * 公式：实际初速度 = 原始初速度 × (1 + 0.5 × 等级)
  *
- * 等级1: 1.5x  等级2: 2.0x  等级3: 2.5x  等级4: 3.0x
+ * 等级1: 1.5x  等级2: 2.0x  等级3: 2.5x  等级4: 3.0x ... 等级10: 6.0x
  *
- * 非作弊最高等级：4
+ * 附魔台最高等级：10（仅可附到书上）
+ * 铁砧合法最高等级：25
  * 理论最高等级：255
  */
 public class SwiftThrowEnchantment extends Enchantment {
 
     public SwiftThrowEnchantment() {
-        super(Rarity.RARE, EnchantmentTarget.BREAKABLE, new EquipmentSlot[]{EquipmentSlot.MAINHAND});
+        // 使用 EnchantmentTarget.VANISHABLE 作为占位，实际通过 isAcceptableItem 控制只能附到书上
+        super(Rarity.RARE, EnchantmentTarget.VANISHABLE, new EquipmentSlot[]{EquipmentSlot.MAINHAND});
     }
 
     @Override
     public int getMaxLevel() {
-        return 4;
+        return 10;
     }
 
     @Override
     public int getMinPower(int level) {
-        return 10 + (level - 1) * 10;
+        // 等级1~10，MinPower范围: 1~28，确保在附魔台30级范围内可达
+        return (int) (1 + (level - 1) * 3);
     }
 
     @Override
     public int getMaxPower(int level) {
         return getMinPower(level) + 15;
+    }
+
+    /**
+     * 控制附魔台上只能附到附魔书上。
+     * 铁砧操作不受此限制（铁砧使用 Enchantment.isAcceptableItem 但也可通过附魔书转移）。
+     */
+    @Override
+    public boolean isAcceptableItem(net.minecraft.item.ItemStack stack) {
+        // 只接受附魔书
+        return stack.getItem() instanceof net.minecraft.item.EnchantedBookItem
+                || stack.getItem() instanceof net.minecraft.item.BookItem;
     }
 
     /**
