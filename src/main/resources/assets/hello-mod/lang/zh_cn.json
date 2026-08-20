@@ -25,5 +25,7 @@
   "item.hello-mod.super_enchanted_golden_apple.throw": "投掷型超级附魔金苹果",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_eat": "模式: 食用",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_throw": "模式: 投掷",
-  "item.hello-mod.super_enchanted_golden_apple.tooltip.switch": "手持时左键切换模式"
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.switch": "手持时左键切换模式",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.splash_effects": "喷溅效果:",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects": "效果云:"
 }

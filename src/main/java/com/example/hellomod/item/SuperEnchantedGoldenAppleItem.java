@@ -10,6 +10,7 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,7 +18,9 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -25,6 +28,7 @@ import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Vec3d;
@@ -135,6 +139,100 @@ public class SuperEnchantedGoldenAppleItem extends Item {
         // 操作提示
         tooltip.add(Text.translatable("item.hello-mod.super_enchanted_golden_apple.tooltip.switch")
                 .formatted(Formatting.DARK_GRAY));
+
+        // 显示药水效果信息
+        NbtCompound nbt = stack.getNbt();
+        if (nbt == null) return;
+
+        // 喷溅效果
+        if (nbt.contains("SplashEffects") || nbt.contains("SplashInstantCount")) {
+            tooltip.add(Text.empty());
+            tooltip.add(Text.translatable("item.hello-mod.super_enchanted_golden_apple.tooltip.splash_effects")
+                    .formatted(Formatting.AQUA));
+            appendEffectsToTooltip(tooltip, nbt, "SplashEffects", "SplashInstantCount");
+        }
+
+        // 效果云
+        if (nbt.contains("CloudEffects") || nbt.contains("CloudInstantCount")) {
+            tooltip.add(Text.empty());
+            tooltip.add(Text.translatable("item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects")
+                    .formatted(Formatting.DARK_AQUA));
+            appendEffectsToTooltip(tooltip, nbt, "CloudEffects", "CloudInstantCount");
+        }
+    }
+
+    /**
+     * 将存储的药水效果添加到 Tooltip 中。
+     */
+    private void appendEffectsToTooltip(List<Text> tooltip, NbtCompound nbt, String effectsKey, String instantKey) {
+        // 持续性效果
+        if (nbt.contains(effectsKey)) {
+            NbtList effects = nbt.getList(effectsKey, 10); // 10 = NbtCompound type
+            for (int i = 0; i < effects.size(); i++) {
+                NbtCompound effectNbt = effects.getCompound(i);
+                String id = effectNbt.getString("Id");
+                int amplifier = effectNbt.getInt("Amplifier");
+                int duration = effectNbt.getInt("Duration");
+
+                StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(id));
+                if (effect == null) continue;
+
+                String effectName = Text.translatable(effect.getTranslationKey()).getString();
+                String levelStr = amplifier > 0 ? " " + toRoman(amplifier + 1) : "";
+                String timeStr = formatDuration(duration);
+
+                tooltip.add(Text.literal("  " + effectName + levelStr + " (" + timeStr + ")")
+                        .formatted(Formatting.BLUE));
+            }
+        }
+
+        // 瞬时效果
+        if (nbt.contains(instantKey)) {
+            NbtList instants = nbt.getList(instantKey, 10);
+            for (int i = 0; i < instants.size(); i++) {
+                NbtCompound icNbt = instants.getCompound(i);
+                String id = icNbt.getString("Id");
+                int amplifier = icNbt.getInt("Amplifier");
+
+                StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(id));
+                if (effect == null) continue;
+
+                String effectName = Text.translatable(effect.getTranslationKey()).getString();
+                String levelStr = amplifier > 0 ? " " + toRoman(amplifier + 1) : "";
+
+                tooltip.add(Text.literal("  " + effectName + levelStr)
+                        .formatted(Formatting.BLUE));
+            }
+        }
+    }
+
+    /**
+     * 将 tick 数转为 "分:秒" 格式。
+     */
+    private String formatDuration(int ticks) {
+        int totalSeconds = ticks / 20;
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%d:%02d", minutes, seconds);
+    }
+
+    /**
+     * 将数字转为罗马数字（简单实现，1-10）。
+     */
+    private String toRoman(int num) {
+        switch (num) {
+            case 1: return "I";
+            case 2: return "II";
+            case 3: return "III";
+            case 4: return "IV";
+            case 5: return "V";
+            case 6: return "VI";
+            case 7: return "VII";
+            case 8: return "VIII";
+            case 9: return "IX";
+            case 10: return "X";
+            default: return String.valueOf(num);
+        }
     }
 
     // ===== 使用行为 =====
@@ -176,15 +274,17 @@ public class SuperEnchantedGoldenAppleItem extends Item {
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         if (!world.isClient() && user instanceof PlayerEntity player) {
-            // 给予效果
+            // 给予基础效果
             applyEatEffects(player);
+
+            // 给予存储的药水额外效果（喷溅+滞留，100%持续时间）
+            applyStoredPotionEffects(player, stack);
 
             // 消耗逻辑
             if (!player.getAbilities().creativeMode) {
                 int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
                 // UnbreakingFoodMixin 会处理耐久附魔的不消耗逻辑
                 // 这里只负责默认消耗
-                // 注意：UnbreakingFoodMixin 已经在 eatFood 中处理了恢复逻辑
             }
 
             HelloMod.LOGGER.info("[SuperApple] Player {} ate super enchanted golden apple", player.getName().getString());
@@ -407,6 +507,23 @@ public class SuperEnchantedGoldenAppleItem extends Item {
         if (piercing > 0) nbt.putInt("PiercingLevel", piercing);
         if (loyalty > 0) nbt.putInt("LoyaltyLevel", loyalty);
 
+        // 传递药水效果 NBT 数据
+        NbtCompound itemNbt = stack.getNbt();
+        if (itemNbt != null) {
+            if (itemNbt.contains("SplashEffects")) {
+                nbt.put("SplashEffects", itemNbt.getList("SplashEffects", 10).copy());
+            }
+            if (itemNbt.contains("SplashInstantCount")) {
+                nbt.put("SplashInstantCount", itemNbt.getList("SplashInstantCount", 10).copy());
+            }
+            if (itemNbt.contains("CloudEffects")) {
+                nbt.put("CloudEffects", itemNbt.getList("CloudEffects", 10).copy());
+            }
+            if (itemNbt.contains("CloudInstantCount")) {
+                nbt.put("CloudInstantCount", itemNbt.getList("CloudInstantCount", 10).copy());
+            }
+        }
+
         entity.setAppleNbt(nbt);
     }
 
@@ -439,6 +556,7 @@ public class SuperEnchantedGoldenAppleItem extends Item {
     // ===== 食用效果 =====
 
     private void applyEatEffects(PlayerEntity player) {
+        // 基础效果（固定）
         // Regeneration V (30s = 600 ticks)
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 600, 4));
         // Absorption IV (2min = 2400 ticks)
@@ -447,6 +565,66 @@ public class SuperEnchantedGoldenAppleItem extends Item {
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 6000, 0));
         // Fire Resistance I (5min = 6000 ticks)
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 6000, 0));
+    }
+
+    /**
+     * 食用时额外应用存储的药水效果。
+     * 食用效果 = 基础效果 + 喷溅型药水效果 + 滞留型药水效果（全部100%持续时间给予食用者）
+     */
+    private void applyStoredPotionEffects(PlayerEntity player, ItemStack stack) {
+        NbtCompound nbt = stack.getNbt();
+        if (nbt == null) return;
+
+        // 应用喷溅型药水的持续性效果
+        applyStoredDurationEffects(player, nbt, "SplashEffects");
+        // 应用滞留型药水的持续性效果
+        applyStoredDurationEffects(player, nbt, "CloudEffects");
+
+        // 触发喷溅型药水的瞬时效果
+        applyStoredInstantEffects(player, nbt, "SplashInstantCount");
+        // 触发滞留型药水的瞬时效果
+        applyStoredInstantEffects(player, nbt, "CloudInstantCount");
+    }
+
+    /**
+     * 应用存储的持续性效果。
+     */
+    private void applyStoredDurationEffects(PlayerEntity player, NbtCompound nbt, String key) {
+        if (!nbt.contains(key)) return;
+        NbtList effects = nbt.getList(key, 10);
+        for (int i = 0; i < effects.size(); i++) {
+            NbtCompound effectNbt = effects.getCompound(i);
+            String id = effectNbt.getString("Id");
+            int amplifier = effectNbt.getInt("Amplifier");
+            int duration = effectNbt.getInt("Duration");
+
+            StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(id));
+            if (effect == null) continue;
+
+            player.addStatusEffect(new StatusEffectInstance(effect, duration, amplifier));
+        }
+    }
+
+    /**
+     * 触发存储的瞬时效果（每瓶各触发一次）。
+     */
+    private void applyStoredInstantEffects(PlayerEntity player, NbtCompound nbt, String key) {
+        if (!nbt.contains(key)) return;
+        NbtList instants = nbt.getList(key, 10);
+        for (int i = 0; i < instants.size(); i++) {
+            NbtCompound icNbt = instants.getCompound(i);
+            String id = icNbt.getString("Id");
+            int amplifier = icNbt.getInt("Amplifier");
+            int count = icNbt.getInt("Count");
+
+            StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(id));
+            if (effect == null) continue;
+
+            // 每次触发一次瞬时效果
+            for (int c = 0; c < count; c++) {
+                effect.applyInstantEffect(player, player, player, amplifier, 1.0);
+            }
+        }
     }
 
     // ===== 工具方法 =====

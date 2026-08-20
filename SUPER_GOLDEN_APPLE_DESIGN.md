@@ -247,18 +247,45 @@
 
 ## 十、技术实现要点
 
-1. **自定义物品** — `SuperEnchantedGoldenAppleItem` 注册于 `ModItems`，合成配方 JSON，物品模型，贴图，语言文件
-2. **合成时药水数据提取** — `SuperAppleCraftingMixin` 注入 `CraftingScreenHandler.updateResult`，读取合成格中喷溅型/滞留型药水的 `Potion` NBT，按合并规则处理后写入产物 NBT
-3. **投掷逻辑** — `SuperGoldenAppleEntity`（继承 `ThrownItemEntity`）处理投掷飞行、碰撞、喷溅和效果云生成，从 NBT 读取 `SplashEffects` 和 `CloudEffects` 应用
-4. **喷溅效果** — 基础效果 + SplashEffects，持续性效果按距离衰减时间，瞬时效果按距离衰减强度（参考原版规则）
-5. **效果云生成** — 基础效果 + CloudEffects，效果云持续时间固定 30s，瞬时效果参考原版滞留型药水的 AreaEffectCloud 行为
-6. **食用逻辑** — 食用时给予：基础效果 + SplashEffects + CloudEffects（全部 100% 持续时间，瞬时效果直接触发对应次数）
-7. **食用附魔效果** — 由 `PlayerEatFoodMixin`（锋利/击退/火焰附加/冰霜行者）和 `UnbreakingFoodMixin`（耐久）处理
-8. **效率加速** — `EfficientEatingMixin` 注入 `Item.getMaxUseTime()`，带效率附魔的食物减少食用时间
-9. **左键切换** — `SuperAppleAttackMixin`（客户端）拦截 `MinecraftClient.doAttack`，判断主手为超级附魔金苹果时切换模式并发送 `SuperAppleModeSwitchC2SPacket` 同步服务端
-10. **5 tick 冷却** — 客户端 Mixin 内部计数器，冷却期间屏蔽左键
-11. **名称动态变化** — 根据 NBT `SuperAppleMode` 标记返回不同的翻译键
-12. **Tooltip 显示** — `appendTooltip` 中读取 NBT 的 `SplashEffects` 和 `CloudEffects`，格式化显示药水效果名称、等级和持续时间
-13. **合成自动附魔** — `SuperAppleCraftingMixin` 合成产出时自动添加迅投 25 + 药水效果数据
-14. **无限附魔冷却** — `InfinityCooldownManager` 自定义冷却管理（基于玩家 UUID + NBT 标记 `InfinityMarked`），支持快速装填减免
-15. **穿透/忠诚** — 穿透（`PiercingPotionMixin`）和忠诚（`LoyaltyPotionMixin` + `LoyaltyCollisionMixin`）当前仅对 `PotionEntity` 生效，超级附魔金苹果实体的穿透/返回逻辑尚未实现
+1. ✅ **自定义物品** — `SuperEnchantedGoldenAppleItem` 注册于 `ModItems`，合成配方 JSON，物品模型，贴图，语言文件
+2. ✅ **合成时药水数据提取** — `SuperAppleCraftingMixin` 注入 `CraftingScreenHandler.updateResult`，读取合成格中喷溅型/滞留型药水的 `Potion` NBT，按合并规则（`SuperApplePotionMerger`）处理后写入产物 NBT
+3. ✅ **投掷逻辑** — `SuperGoldenAppleEntity`（继承 `ThrownItemEntity`）处理投掷飞行、碰撞、喷溅和效果云生成，从 NBT 读取 `SplashEffects` 和 `CloudEffects` 应用
+4. ✅ **喷溅效果** — 基础效果 + SplashEffects，持续性效果按距离衰减时间，瞬时效果按距离衰减强度（参考原版规则）
+5. ✅ **效果云生成** — 基础效果 + CloudEffects，效果云持续时间固定 30s，瞬时效果参考原版滞留型药水的 AreaEffectCloud 行为
+6. ✅ **食用逻辑** — 食用时给予：基础效果 + SplashEffects + CloudEffects（全部 100% 持续时间，瞬时效果直接触发对应次数）
+7. ✅ **食用附魔效果** — 由 `PlayerEatFoodMixin`（锋利/击退/火焰附加/冰霜行者）和 `UnbreakingFoodMixin`（耐久）处理
+8. ✅ **效率加速** — `EfficientEatingMixin` 注入 `Item.getMaxUseTime()`，带效率附魔的食物减少食用时间
+9. ✅ **左键切换** — `SuperAppleAttackMixin`（客户端）拦截 `MinecraftClient.doAttack`，判断主手为超级附魔金苹果时切换模式并发送 `SuperAppleModeSwitchC2SPacket` 同步服务端
+10. ✅ **5 tick 冷却** — 客户端 Mixin 内部计数器，冷却期间屏蔽左键
+11. ✅ **名称动态变化** — 根据 NBT `SuperAppleMode` 标记返回不同的翻译键
+12. ✅ **Tooltip 显示** — `appendTooltip` 中读取 NBT 的 `SplashEffects`、`SplashInstantCount`、`CloudEffects`、`CloudInstantCount`，格式化显示药水效果名称、等级和持续时间（瞬时效果不显示时间）
+13. ✅ **合成自动附魔** — `SuperAppleCraftingMixin` 合成产出时自动添加迅投 25 + 药水效果数据
+14. ✅ **无限附魔冷却** — `InfinityCooldownManager` 自定义冷却管理（基于玩家 UUID + NBT 标记 `InfinityMarked`），支持快速装填减免
+15. ⬜ **穿透/忠诚** — 穿透（`PiercingPotionMixin`）和忠诚（`LoyaltyPotionMixin` + `LoyaltyCollisionMixin`）当前仅对 `PotionEntity` 生效，超级附魔金苹果实体的穿透/返回逻辑尚未实现
+16. ✅ **铁砧惩罚锁定** — `SuperAppleAnvilMixin` 将超级附魔金苹果的 RepairCost 锁定为 10，防止多次铁砧操作后惩罚指数增长
+17. ✅ **投掷时药水数据传递** — `writeEnchantDataToEntity` 将物品 NBT 中的 SplashEffects/CloudEffects/SplashInstantCount/CloudInstantCount 完整复制到投掷实体
+
+---
+
+## 十一、实现文件清单
+
+| 文件 | 用途 |
+|------|------|
+| `item/SuperEnchantedGoldenAppleItem.java` | 物品主类：双模式、食用/投掷逻辑、Tooltip、效果应用 |
+| `item/ModItems.java` | 物品注册 |
+| `item/SuperAppleCraftingHandler.java` | 合成附魔工具（旧，保留兼容） |
+| `item/SuperApplePotionMerger.java` | 药水效果合并工具类（避免 Mixin 内部类问题） |
+| `entity/SuperGoldenAppleEntity.java` | 投掷实体：飞行、碰撞、喷溅效果、效果云生成 |
+| `entity/ModEntities.java` | 实体注册 |
+| `mixin/SuperAppleCraftingMixin.java` | 合成注入：添加迅投 25 + 读取药水数据写入 NBT |
+| `mixin/SuperAppleAnvilMixin.java` | 铁砧注入：锁定 RepairCost |
+| `mixin/client/SuperAppleAttackMixin.java` | 客户端左键拦截：模式切换 + 5 tick 冷却 |
+| `network/SuperAppleModeSwitchC2SPacket.java` | C2S 网络包：模式切换同步 |
+| `enchantment/ModEnchantments.java` | 迅投附魔注册 |
+| `enchantment/SwiftThrowEnchantment.java` | 迅投附魔实现 |
+| `enchantment/InfinityCooldownManager.java` | 无限附魔冷却管理 |
+| `resources/data/hello-mod/recipes/super_enchanted_golden_apple.json` | 合成配方 |
+| `resources/assets/hello-mod/models/item/super_enchanted_golden_apple.json` | 物品模型 |
+| `resources/assets/hello-mod/textures/item/super_enchanted_golden_apple.png` | 物品贴图 |
+| `resources/assets/hello-mod/lang/zh_cn.json` | 中文翻译 |
+| `resources/assets/hello-mod/lang/en_us.json` | 英文翻译 |

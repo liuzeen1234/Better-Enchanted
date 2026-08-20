@@ -25,5 +25,7 @@
   "item.hello-mod.super_enchanted_golden_apple.throw": "Throwable Super Enchanted Golden Apple",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_eat": "Mode: Eat",
   "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_throw": "Mode: Throw",
-  "item.hello-mod.super_enchanted_golden_apple.tooltip.switch": "Left-click to switch mode"
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.switch": "Left-click to switch mode",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.splash_effects": "Splash Effects:",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.cloud_effects": "Effect Cloud:"
 }

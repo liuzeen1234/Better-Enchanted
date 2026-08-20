@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,7 +17,10 @@ import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -205,6 +209,8 @@ public class SuperGoldenAppleEntity extends ThrownItemEntity {
     /**
      * 喷溅效果：范围4格内所有生物获得 buff。
      * 持续时间按距离衰减：time = maxTime * (1 - distance/4)
+     * 
+     * 给予：基础效果 + SplashEffects（喷溅型药水额外效果）
      */
     private void applySplashEffects(Vec3d hitPos) {
         World world = this.getWorld();
@@ -219,6 +225,7 @@ public class SuperGoldenAppleEntity extends ThrownItemEntity {
             double durationMultiplier = 1.0 - distance / 4.0;
             if (durationMultiplier <= 0) continue;
 
+            // 基础效果
             // Regeneration V (30s = 600 ticks)
             int regenDuration = (int) (600 * durationMultiplier);
             if (regenDuration > 0) {
@@ -241,6 +248,44 @@ public class SuperGoldenAppleEntity extends ThrownItemEntity {
             int fireResDuration = (int) (6000 * durationMultiplier);
             if (fireResDuration > 0) {
                 entity.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, fireResDuration, 0));
+            }
+
+            // 喷溅型药水额外持续性效果（按距离衰减时间）
+            if (appleNbt.contains("SplashEffects")) {
+                NbtList splashEffects = appleNbt.getList("SplashEffects", 10);
+                for (int i = 0; i < splashEffects.size(); i++) {
+                    NbtCompound effectNbt = splashEffects.getCompound(i);
+                    String id = effectNbt.getString("Id");
+                    int amplifier = effectNbt.getInt("Amplifier");
+                    int duration = effectNbt.getInt("Duration");
+
+                    StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(id));
+                    if (effect == null) continue;
+
+                    int adjustedDuration = (int) (duration * durationMultiplier);
+                    if (adjustedDuration > 0) {
+                        entity.addStatusEffect(new StatusEffectInstance(effect, adjustedDuration, amplifier));
+                    }
+                }
+            }
+
+            // 喷溅型药水瞬时效果（按距离衰减强度）
+            if (appleNbt.contains("SplashInstantCount")) {
+                NbtList instantEffects = appleNbt.getList("SplashInstantCount", 10);
+                for (int i = 0; i < instantEffects.size(); i++) {
+                    NbtCompound icNbt = instantEffects.getCompound(i);
+                    String id = icNbt.getString("Id");
+                    int amplifier = icNbt.getInt("Amplifier");
+                    int count = icNbt.getInt("Count");
+
+                    StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(id));
+                    if (effect == null) continue;
+
+                    Entity owner = this.getOwner();
+                    for (int c = 0; c < count; c++) {
+                        effect.applyInstantEffect(owner, owner, entity, amplifier, durationMultiplier);
+                    }
+                }
             }
         }
     }
@@ -329,6 +374,7 @@ public class SuperGoldenAppleEntity extends ThrownItemEntity {
 
     /**
      * 生成效果云（参考滞留型药水机制）。
+     * 效果 = 基础效果 + CloudEffects（滞留型药水额外效果）
      */
     private void spawnAreaEffectCloud(Vec3d hitPos) {
         World world = this.getWorld();
@@ -344,11 +390,43 @@ public class SuperGoldenAppleEntity extends ThrownItemEntity {
         cloud.setRadiusGrowth(-cloud.getRadius() / (float) cloud.getDuration());
         cloud.setDuration(600); // 30s
 
-        // 添加效果
+        // 基础效果
         cloud.addEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 600, 4));
         cloud.addEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 2400, 3));
         cloud.addEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 6000, 0));
         cloud.addEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 6000, 0));
+
+        // 滞留型药水额外持续性效果
+        if (appleNbt.contains("CloudEffects")) {
+            NbtList cloudEffects = appleNbt.getList("CloudEffects", 10);
+            for (int i = 0; i < cloudEffects.size(); i++) {
+                NbtCompound effectNbt = cloudEffects.getCompound(i);
+                String id = effectNbt.getString("Id");
+                int amplifier = effectNbt.getInt("Amplifier");
+                int duration = effectNbt.getInt("Duration");
+
+                StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(id));
+                if (effect == null) continue;
+
+                cloud.addEffect(new StatusEffectInstance(effect, duration, amplifier));
+            }
+        }
+
+        // 滞留型药水瞬时效果 — AreaEffectCloud 原生支持瞬时效果
+        if (appleNbt.contains("CloudInstantCount")) {
+            NbtList instantEffects = appleNbt.getList("CloudInstantCount", 10);
+            for (int i = 0; i < instantEffects.size(); i++) {
+                NbtCompound icNbt = instantEffects.getCompound(i);
+                String id = icNbt.getString("Id");
+                int amplifier = icNbt.getInt("Amplifier");
+
+                StatusEffect effect = Registries.STATUS_EFFECT.get(new Identifier(id));
+                if (effect == null) continue;
+
+                // 瞬时效果添加到效果云，duration=1 让原版机制处理
+                cloud.addEffect(new StatusEffectInstance(effect, 1, amplifier));
+            }
+        }
 
         world.spawnEntity(cloud);
     }
