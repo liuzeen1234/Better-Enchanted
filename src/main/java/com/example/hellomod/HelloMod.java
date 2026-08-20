@@ -7,6 +7,7 @@ import com.example.hellomod.enchantment.ModEnchantments;
 import com.example.hellomod.entity.ModEntities;
 import com.example.hellomod.item.ModItems;
 import com.example.hellomod.network.SuperAppleModeSwitchC2SPacket;
+import com.example.hellomod.network.EntityNbtRequestC2SPacket;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ public class HelloMod implements ModInitializer {
 
         // 注册网络包接收器
         SuperAppleModeSwitchC2SPacket.registerServerReceiver();
+        EntityNbtRequestC2SPacket.registerServerReceiver();
 
         // 玩家断开连接时清理无限冷却数据
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {

@@ -1,6 +1,7 @@
 package com.example.hellomod.client;
 
 import com.example.hellomod.entity.ModEntities;
+import com.example.hellomod.network.EntityNbtResponseS2CPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -51,6 +52,9 @@ public class HelloModClient implements ClientModInitializer {
     public void onInitializeClient() {
         // 加载持久化配置
         ModConfig.load();
+
+        // 注册实体 NBT 响应包的客户端接收器
+        EntityNbtResponseS2CPacket.registerClientReceiver();
 
         // 注册无限附魔冷却客户端同步
         InfinityCooldownClientState.register();
@@ -124,23 +128,31 @@ public class HelloModClient implements ClientModInitializer {
                 yOffset += 12;
             }
 
-            // 显示所有NBT标签
+            // 显示所有NBT标签（0.5x 缩放，与实体详细信息一致）
             NbtCompound nbt = mainHand.getNbt();
             if (nbt != null) {
+                float scale = 0.5f;
+                drawContext.getMatrices().push();
+                drawContext.getMatrices().scale(scale, scale, 1.0f);
+
+                int scaledX = (int) (4 / scale);
+                int scaledYOffset = (int) ((4 + yOffset) / scale);
+                int maxLineLength = 120;
+
                 for (String key : nbt.getKeys()) {
                     NbtElement element = nbt.get(key);
                     String nbtText = key + ": " + (element != null ? element.asString() : "null");
-                    // 超过80字符时换行显示
-                    int maxLineLength = 80;
                     int startIndex = 0;
                     while (startIndex < nbtText.length()) {
                         int endIndex = Math.min(startIndex + maxLineLength, nbtText.length());
                         String line = nbtText.substring(startIndex, endIndex);
-                        drawContext.drawText(textRenderer, line, 4, 4 + yOffset, 0xAAAAAA, true);
-                        yOffset += 12;
+                        drawContext.drawText(textRenderer, line, scaledX, scaledYOffset, 0xAAAAAA, true);
+                        scaledYOffset += 12;
                         startIndex = endIndex;
                     }
                 }
+
+                drawContext.getMatrices().pop();
             }
         }
     }

@@ -29,6 +29,7 @@ public class ModConfig {
         // === 实体血量 HUD ===
         public boolean entityHealthHudEnabled = false;
         public double entityHealthHudReachDistance = 128.0;
+        public boolean entityHealthHudDetailedInfo = false;
 
         // === 手持物品 HUD ===
         public boolean itemHudEnabled = false;
@@ -98,6 +99,15 @@ public class ModConfig {
 
     public static void setEntityHealthHudReachDistance(double distance) {
         data.entityHealthHudReachDistance = distance;
+        save();
+    }
+
+    public static boolean isEntityHealthHudDetailedInfo() {
+        return data.entityHealthHudDetailedInfo;
+    }
+
+    public static void setEntityHealthHudDetailedInfo(boolean enabled) {
+        data.entityHealthHudDetailedInfo = enabled;
         save();
     }
 

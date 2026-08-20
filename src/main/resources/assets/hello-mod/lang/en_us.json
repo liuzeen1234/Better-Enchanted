@@ -16,6 +16,7 @@
   "screen.hello-mod.health_hud_setting.toggle": "Display: %s",
   "screen.hello-mod.health_hud_setting.reach_distance": "Detection Distance",
   "screen.hello-mod.health_hud_setting.reach_distance_unit": "block",
+  "screen.hello-mod.health_hud_setting.detailed_info": "Show Detailed Info: %s",
   "screen.hello-mod.item_hud_setting.title": "Held Item Display Settings",
   "screen.hello-mod.item_hud_setting.toggle": "Display: %s",
   "screen.hello-mod.item_hud_setting.advanced_toggle": "Advanced Item Display: %s",
