@@ -89,11 +89,11 @@ public abstract class SuperAppleAnvilMixin extends ForgingScreenHandler {
             this.player.getAbilities().creativeMode = hello_mod$originalCreativeMode;
             hello_mod$isSuperAppleOperation = false;
 
-            // 锁定输出物品的 RepairCost 为 0
+            // 锁定输出物品的 RepairCost 为 10
             ItemStack output = this.output.getStack(0);
             if (!output.isEmpty() && (output.getItem() == ModItems.SUPER_ENCHANTED_GOLDEN_APPLE
                     || output.getItem() == ModItems.ULTIMATE_ENCHANTED_GOLDEN_APPLE)) {
-                output.setRepairCost(0);
+                output.setRepairCost(10);
             }
         }
     }
