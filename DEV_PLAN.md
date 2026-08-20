@@ -51,7 +51,22 @@
 - ✅ **所有已实现附魔兼容** — 投掷模式兼容锋利/力量/冲击/火矢/引雷/多重射击/无限/耐久/快速装填/迅投；食用模式兼容锋利/击退/火焰附加/效率/冰霜行者/耐久
 - ⬜ **穿透/忠诚对超级金苹果实体** — 穿透和忠诚当前仅对普通PotionEntity生效，SuperGoldenAppleEntity的穿透/返回逻辑尚未实现
 
-### 七、辅助功能/客户端功能（已完成）
+### 八、终极附魔金苹果系统（已完成）
+
+- ✅ **终极附魔金苹果物品** — 自定义物品 `UltimateEnchantedGoldenAppleItem`，自带附魔：效率9、耐久10、迅投25、无限1
+- ✅ **获取方式** — 通过自定义进度奖励获得（将超级附魔金苹果的14种有效附魔全部附至最高等级），奖励额外给予1000经验等级
+- ✅ **双模式切换** — 手持时左键切换食用/投掷模式，2 tick冷却（比超级版更快），名称动态变化（亮金色GOLD文字）
+- ✅ **食用模式** — 效率9使食用近乎瞬时（约3 tick），给予生命恢复V(60s)+抗性提升III(60s)+力量V(60s)；耐久10判定成功（91%概率）不消耗+3s冷却，判定失败消耗无冷却
+- ✅ **投掷模式** — 迅投25射线追踪瞬达，落地后4格范围检测：敌对生物受100点真实伤害+无条件召唤闪电，友好生物/玩家获得生命恢复V(60s)
+- ✅ **投掷消耗** — 自带无限+耐久10，投掷不消耗进入冷却（受快速装填减免），耐久判定成功免冷却
+- ✅ **附魔额外效果** — 投掷落地后对4格范围实体施加锋利/力量/冲击/火矢/引雷等附魔效果
+- ✅ **多重射击兼容** — 投掷模式完全兼容多重射击附魔，圆锥散布
+- ✅ **进度系统** — `AdvancementRewardMixin` 监听进度完成事件，`UltimateAppleChecker` 判定14种附魔是否满级
+- ✅ **自定义伤害源** — `UltimateAppleDamageSource` 提供专属死亡消息
+- ✅ **投掷实体** — `UltimateGoldenAppleEntity` 继承 `ThrownItemEntity`，支持射线追踪和碰撞检测
+- ✅ **Tooltip显示** — 显示双模式、食用效果、投掷效果（4格范围/100真实伤害/生命恢复V）
+
+### 九、辅助功能/客户端功能（已完成）
 
 - ✅ **实体血量HUD** — 准星指向实体时显示[名称][血量/最大血量]，无血量实体显示[-/-]，检测距离可配置（最大128格）
 - ✅ **实体详细信息显示** — 设置中开启后显示实体完整NBT信息（0.5x缩放），ActiveEffects优先显示（绿色高亮），通过服务端网络包同步NBT数据
@@ -115,7 +130,9 @@
 
 5. **超级附魔金苹果**：详见 `SUPER_GOLDEN_APPLE_DESIGN.md`
 
-6. **Mixin 注入点**：
+6. **终极附魔金苹果**：详见 `ULTIMATE_GOLDEN_APPLE_DESIGN.md`
+
+7. **Mixin 注入点**：
    - 食物食用：`PlayerEatFoodMixin` → `PlayerEntity.eatFood()`
    - 食用速度：`EfficientEatingMixin` → `Item.getMaxUseTime()`
    - 食物耐久：`UnbreakingFoodMixin`
@@ -132,3 +149,4 @@
    - 超级金苹果左键：`SuperAppleAttackMixin`（客户端）
    - 无敌帧：`LivingEntityDamageCooldownMixin`
    - 冷却覆盖渲染：`DrawContextCooldownMixin`（客户端）
+   - 进度奖励：`AdvancementRewardMixin` → `PlayerAdvancementTracker.grantCriterion()`

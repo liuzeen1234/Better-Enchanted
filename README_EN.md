@@ -204,21 +204,107 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 
 ---
 
-## VII. Utility Features
+## VII. Super Enchanted Golden Apple
 
-### 7.1 Entity Health HUD
+### 7.1 Item Overview
+
+| Property | Description |
+|----------|-------------|
+| Item ID | `hello-mod:super_enchanted_golden_apple` |
+| Text Color | Light purple (LIGHT_PURPLE) |
+| Built-in Enchantment | Swift Throw 25 |
+| Acquisition | 3×3 crafting table (Gold Blocks ×4 + Splash Potions ×2 + Lingering Potions ×2 + Golden Apple ×1) |
+
+### 7.2 Mode Switching
+
+- Left-click while held to switch between eat/throw mode, **5 game tick** cooldown
+- Dynamic name: "Super Enchanted Golden Apple" in eat mode, "Throwable Super Enchanted Golden Apple" in throw mode
+
+### 7.3 Eat Mode
+
+- Eating time 32 ticks (1.6s), accelerated by Efficiency enchantment
+- Eat effects = Base effects + Splash potion effects + Lingering potion effects (100% duration)
+- **Base effects**: Regeneration V (30s) + Absorption IV (2min) + Resistance I (5min) + Fire Resistance I (5min)
+
+### 7.4 Throw Mode
+
+- Built-in Swift Throw 25 (raycast instant-hit)
+- On impact: first triggers **splash effects** (base buffs + splash potion effects, distance-attenuated), then spawns **area effect cloud** (base buffs + lingering potion effects)
+- Enchantment extra effects (Sharpness/Power/Punch/Flame/Channeling/Multishot) all work
+
+### 7.5 Potion Effect Storage
+
+- On crafting, reads potion effects from splash/lingering potions in recipe, merges by rules and stores in NBT
+- Tooltip displays full splash effects and cloud effects info
+
+### 7.6 Anvil Compatibility
+
+- RepairCost locked at 10 to prevent exponential penalty growth
+- Additional enchantments can be applied via anvil (Sharpness/Power/Punch/Flame/Infinity/Unbreaking/Quick Charge/Channeling/Multishot/Piercing/Loyalty)
+
+---
+
+## VIII. Ultimate Enchanted Golden Apple
+
+### 8.1 Item Overview
+
+| Property | Description |
+|----------|-------------|
+| Item ID | `hello-mod:ultimate_enchanted_golden_apple` |
+| Text Color | Bright gold (GOLD) |
+| Built-in Enchantments | Efficiency 9, Unbreaking 10, Swift Throw 25, Infinity 1 |
+| Acquisition | Custom advancement reward (Super Enchanted Golden Apple with all 14 valid enchantments at max level) |
+
+### 8.2 Mode Switching
+
+- Left-click while held to switch between eat/throw mode, **2 game tick** cooldown (faster than Super version)
+- Dynamic name change: "Ultimate Enchanted Golden Apple" in eat mode, "Throwable Ultimate Enchanted Golden Apple" in throw mode
+
+### 8.3 Eat Mode
+
+- Efficiency 9 reduces eating time to ~3 ticks (nearly instant)
+- **Fixed effects** (no potion NBT):
+
+| Effect | Level | Duration |
+|--------|-------|----------|
+| Regeneration | V | 60s |
+| Resistance | III | 60s |
+| Strength | V | 60s |
+
+- **Consumption**: Unbreaking 10 check passes (91% chance) → not consumed + 3s use cooldown; fails (9%) → consumed, no cooldown
+
+### 8.4 Throw Mode
+
+- Swift Throw 25 (>20) → raycast instant-hit mode
+- **4-block radius detection on impact**:
+  - Hostile mobs: 100 true damage (ignores armor) + unconditional lightning strike
+  - Friendly mobs/Players: Regeneration V (60s)
+- Enchantment extra effects (Sharpness/Power/Punch/Flame/Channeling) apply to all entities in range
+- **Consumption**: Built-in Infinity + Unbreaking 10; no consumption on throw, enters 30s cooldown (reduced by Quick Charge); Unbreaking check pass = no cooldown
+
+### 8.5 Advancement Requirements
+
+- All 14 valid enchantments on a Super Enchanted Golden Apple at their legal max level:
+  - Swift Throw 25, Sharpness V, Power V, Punch II, Flame I, Channeling I, Multishot 10, Infinity I, Unbreaking III, Quick Charge III, Knockback II, Fire Aspect II, Efficiency V, Frost Walker II
+- Advancement reward: 1 Ultimate Enchanted Golden Apple (with 4 built-in enchantments) + 1000 experience levels
+
+---
+
+## IX. Utility Features
+
+### 9.1 Entity Health HUD
 
 - Displays target's current HP / max HP on screen when crosshair is aimed at an entity
 - Detection distance is configurable (default 128 blocks)
 - Can be independently toggled via debug menu
 
-### 7.2 Held Item HUD
+### 9.2 Held Item HUD
 
 - Displays main hand item name and count in the top-left corner
 - **Advanced mode**: Additionally shows item durability and full NBT tag data
 - Can be independently toggled via debug menu
 
-### 7.3 Debug Menu
+### 9.3 Debug Menu
 
 - Opened via custom keybind (unbound by default, configurable in key settings)
 - Provides sub-menus:
@@ -226,7 +312,7 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
   - Held item display settings (toggle + advanced mode toggle)
   - Debug log toggles (independent control of 9 log modules: cake/place/food/potion/damage/swift throw/client/frost walker/infinity cooldown)
 
-### 7.4 Persistent Configuration
+### 9.4 Persistent Configuration
 
 - Config file located at `config/hello-mod.json`
 - All setting changes auto-save; auto-loads on startup
@@ -234,9 +320,9 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 
 ---
 
-## VIII. Technical Architecture
+## X. Technical Architecture
 
-### 8.1 Core Tech Stack
+### 10.1 Core Tech Stack
 
 | Component | Technology |
 |-----------|-----------|
@@ -247,7 +333,7 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 | Code Modification | Mixin Injection |
 | Mappings | Yarn 1.20.4+build.3:v2 |
 
-### 8.2 Mixin Injection Points
+### 10.2 Mixin Injection Points
 
 | Mixin Class | Target | Purpose |
 |-------------|--------|---------|
@@ -264,12 +350,15 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 | LoyaltyPotionMixin | `PotionEntity.tick()` | Loyalty return logic |
 | LoyaltyCollisionMixin | `PotionEntity` collision | Loyalty return collision handling |
 | LivingEntityDamageCooldownMixin | `LivingEntity` | Damage invincibility frame adjustment |
+| AdvancementRewardMixin | `PlayerAdvancementTracker.grantCriterion()` | Ultimate golden apple advancement reward |
 
-### 8.3 Package Structure
+### 10.3 Package Structure
 
 ```
 com.example.hellomod
 ├── HelloMod.java                    # Main entrypoint, registers events and systems
+├── advancement/                     # Advancement checks
+│   └── UltimateAppleChecker.java    # Ultimate golden apple enchantment checker
 ├── block/                           # Cake enchantment storage, block entities
 │   ├── CakeEnchantmentStorage.java  # In-memory cake enchantment data management
 │   ├── EnchantedCakeBlockEntity.java
@@ -288,7 +377,8 @@ com.example.hellomod
 │   ├── ModDamageTypes.java
 │   ├── SharpFoodDamageSource.java
 │   ├── SharpPotionDamageSource.java
-│   └── PowerPotionDamageSource.java
+│   ├── PowerPotionDamageSource.java
+│   └── UltimateAppleDamageSource.java
 ├── debug/                           # Debug log control
 │   └── DebugLogConfig.java
 ├── effect/                          # Custom effects
@@ -303,7 +393,7 @@ com.example.hellomod
     └── ...                          # See table above
 ```
 
-### 8.4 Key Design Decisions
+### 10.4 Key Design Decisions
 
 1. **Cake special handling**: Cakes are blocks, not items, so ItemStack NBT can't be read directly. Uses `CakeEnchantmentStorage` to bind enchantment data to block coordinates — written on placement, cleared when fully eaten.
 
@@ -315,7 +405,7 @@ com.example.hellomod
 
 ---
 
-## IX. Enchantment Overview Table
+## XI. Enchantment Overview Table
 
 | Enchantment | Food | Potion | Max Level | Notes |
 |-------------|:----:|:------:|:---------:|-------|
@@ -338,7 +428,7 @@ com.example.hellomod
 
 ---
 
-## X. Runtime Environment & Dependencies
+## XII. Runtime Environment & Dependencies
 
 - **Minecraft**: 1.20.4
 - **Fabric Loader**: ≥ 0.15.0
