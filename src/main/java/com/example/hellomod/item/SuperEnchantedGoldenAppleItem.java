@@ -255,9 +255,9 @@ public class SuperEnchantedGoldenAppleItem extends Item {
         float pitchOffset = pitchOffsetDeg < 1.0f ? 0.0f : -pitchOffsetDeg;
 
         if (swiftThrowLevel > 20) {
-            // 射线追踪模式
+            // 射线追踪模式 — 直线命中无重力，不需要角度补偿
             float safeLaunchSpeed = baseSpeed * SwiftThrowEnchantment.getSpeedMultiplier(20);
-            float adjustedPitch = user.getPitch() + pitchOffset;
+            float adjustedPitch = user.getPitch();
             Vec3d direction = calculateDirection(user.getYaw(), adjustedPitch);
 
             entity.setVelocity(direction.multiply(safeLaunchSpeed));
