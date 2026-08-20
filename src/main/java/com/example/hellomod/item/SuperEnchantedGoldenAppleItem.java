@@ -642,4 +642,14 @@ public class SuperEnchantedGoldenAppleItem extends Item {
     public boolean hasGlint(ItemStack stack) {
         return true; // 始终显示附魔光效
     }
+
+    /**
+     * 允许超级附魔金苹果在铁砧上接受附魔操作。
+     * 原版 Item.isEnchantable() 要求 maxCount==1 && isDamageable()，
+     * 但超级金苹果堆叠64且无耐久度，所以需要显式返回 true。
+     */
+    @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return true;
+    }
 }
