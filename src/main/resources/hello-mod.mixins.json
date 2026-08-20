@@ -17,7 +17,8 @@
         "PiercingPotionMixin",
         "LoyaltyPotionMixin",
         "LoyaltyCollisionMixin",
-        "SuperAppleCraftingMixin"
+        "SuperAppleCraftingMixin",
+        "SuperAppleAnvilMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin",
