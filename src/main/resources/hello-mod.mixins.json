@@ -16,11 +16,13 @@
         "LivingEntityDamageCooldownMixin",
         "PiercingPotionMixin",
         "LoyaltyPotionMixin",
-        "LoyaltyCollisionMixin"
+        "LoyaltyCollisionMixin",
+        "SuperAppleCraftingMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin",
-        "client.SwiftThrowRenderMixin"
+        "client.SwiftThrowRenderMixin",
+        "client.SuperAppleAttackMixin"
     ],
     "injectors": {
         "defaultRequire": 1

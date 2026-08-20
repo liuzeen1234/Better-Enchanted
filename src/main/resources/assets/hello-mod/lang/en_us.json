@@ -20,5 +20,10 @@
   "screen.hello-mod.item_hud_setting.toggle": "Display: %s",
   "screen.hello-mod.item_hud_setting.advanced_toggle": "Advanced Item Display: %s",
   "screen.hello-mod.back": "Back",
-  "enchantment.hello-mod.swift_throw": "Swift Throw"
+  "enchantment.hello-mod.swift_throw": "Swift Throw",
+  "item.hello-mod.super_enchanted_golden_apple": "Super Enchanted Golden Apple",
+  "item.hello-mod.super_enchanted_golden_apple.throw": "Throwable Super Enchanted Golden Apple",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_eat": "Mode: Eat",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_throw": "Mode: Throw",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.switch": "Left-click to switch mode"
 }

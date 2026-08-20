@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "hello-mod:item/super_enchanted_golden_apple"
+  }
+}

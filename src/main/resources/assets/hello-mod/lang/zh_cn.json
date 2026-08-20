@@ -20,5 +20,10 @@
   "screen.hello-mod.item_hud_setting.toggle": "显示: %s",
   "screen.hello-mod.item_hud_setting.advanced_toggle": "高级物品显示: %s",
   "screen.hello-mod.back": "返回",
-  "enchantment.hello-mod.swift_throw": "迅投"
+  "enchantment.hello-mod.swift_throw": "迅投",
+  "item.hello-mod.super_enchanted_golden_apple": "超级附魔金苹果",
+  "item.hello-mod.super_enchanted_golden_apple.throw": "投掷型超级附魔金苹果",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_eat": "模式: 食用",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.mode_throw": "模式: 投掷",
+  "item.hello-mod.super_enchanted_golden_apple.tooltip.switch": "手持时左键切换模式"
 }
