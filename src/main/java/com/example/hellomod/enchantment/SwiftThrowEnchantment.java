@@ -13,8 +13,8 @@ import net.minecraft.entity.EquipmentSlot;
  *
  * 等级1: 1.5x  等级2: 2.0x  等级3: 2.5x  等级4: 3.0x ... 等级10: 6.0x
  *
- * 附魔台最高等级：10（仅可附到书上）
- * 铁砧合法最高等级：25
+ * 附魔台最高等级：10（仅可附到书上，通过MinPower限制）
+ * 铁砧合法最高等级：19（getMaxLevel()=19，无法触发>20级射线追踪模式）
  * 理论最高等级：255
  */
 public class SwiftThrowEnchantment extends Enchantment {
@@ -26,13 +26,19 @@ public class SwiftThrowEnchantment extends Enchantment {
 
     @Override
     public int getMaxLevel() {
-        return 10;
+        // 返回19以允许铁砧合并到19级，但无法达到20级触发射线追踪模式
+        // 附魔台通过 getMinPower/getMaxPower 限制只能出到10级
+        return 19;
     }
 
     @Override
     public int getMinPower(int level) {
-        // 等级1~10，MinPower范围: 1~28，确保在附魔台30级范围内可达
-        return (int) (1 + (level - 1) * 3);
+        if (level <= 10) {
+            // 1~10级：MinPower范围 1~28，在附魔台30级范围内可达
+            return (int) (1 + (level - 1) * 3);
+        }
+        // 11~25级：MinPower > 50，附魔台不可能达到，只能通过铁砧合并获得
+        return 50 + (level - 11) * 10;
     }
 
     @Override
