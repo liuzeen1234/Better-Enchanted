@@ -24,8 +24,8 @@ public class DebugLogSettingScreen extends Screen {
         int buttonHeight = 20;
         int gap = 22;
         int centerX = this.width / 2 - buttonWidth / 2;
-        // 9个开关按钮，居中布局
-        int totalHeight = 9 * gap;
+        // 10个开关按钮，居中布局
+        int totalHeight = 10 * gap;
         int startY = this.height / 2 - totalHeight / 2;
 
         // 1. [CakeDebug] 蛋糕食用调试
@@ -109,6 +109,14 @@ public class DebugLogSettingScreen extends Screen {
                 }
         ).dimensions(centerX, startY + gap * 8, buttonWidth, buttonHeight).build());
 
+        // 10. [BehaviorLog] 玩家行为实时日志
+        this.addDrawableChild(ButtonWidget.builder(
+                getToggleText("玩家行为 [BehaviorLog]", DebugLogConfig.isPlayerBehaviorLogEnabled()),
+                button -> {
+                    DebugLogConfig.togglePlayerBehaviorLog();
+                    button.setMessage(getToggleText("玩家行为 [BehaviorLog]", DebugLogConfig.isPlayerBehaviorLogEnabled()));
+                }
+        ).dimensions(centerX, startY + gap * 9, buttonWidth, buttonHeight).build());
 
     }
 

@@ -16,11 +16,20 @@
         "LivingEntityDamageCooldownMixin",
         "PiercingPotionMixin",
         "LoyaltyPotionMixin",
-        "LoyaltyCollisionMixin"
+        "LoyaltyCollisionMixin",
+        "SuperAppleCraftingMixin",
+        "SuperAppleAnvilMixin",
+        "AdvancementRewardMixin",
+        "PlayerBehaviorLogMixin",
+        "PlayerBlockInteractLogMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin",
-        "client.SwiftThrowRenderMixin"
+        "client.SwiftThrowRenderMixin",
+        "client.SuperAppleAttackMixin",
+        "client.BehaviorLogClientMixin",
+        "client.BehaviorLogKeyboardMixin",
+        "client.BehaviorLogMouseMixin"
     ],
     "injectors": {
         "defaultRequire": 1

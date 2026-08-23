@@ -14,5 +14,9 @@ run/
 Thumbs.db
 .DS_Store
 
-# Video script
+# Docs
 VIDEO_SCRIPT.md
+
+# Misc
+calc_anvil.ps1
+unnamed.png

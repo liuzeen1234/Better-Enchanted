@@ -47,6 +47,10 @@ public class DebugLogConfig {
         return ModConfig.isInfinityCooldownEnabled();
     }
 
+    public static boolean isPlayerBehaviorLogEnabled() {
+        return ModConfig.isPlayerBehaviorLogEnabled();
+    }
+
     // ========== Toggles ==========
 
     public static void toggleCakeDebug() {
@@ -83,5 +87,9 @@ public class DebugLogConfig {
 
     public static void toggleInfinityCooldown() {
         ModConfig.setInfinityCooldownEnabled(!ModConfig.isInfinityCooldownEnabled());
+    }
+
+    public static void togglePlayerBehaviorLog() {
+        ModConfig.setPlayerBehaviorLogEnabled(!ModConfig.isPlayerBehaviorLogEnabled());
     }
 }

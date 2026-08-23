@@ -29,6 +29,7 @@ public class ModConfig {
         // === 实体血量 HUD ===
         public boolean entityHealthHudEnabled = false;
         public double entityHealthHudReachDistance = 128.0;
+        public boolean entityHealthHudDetailedInfo = false;
 
         // === 手持物品 HUD ===
         public boolean itemHudEnabled = false;
@@ -44,6 +45,9 @@ public class ModConfig {
         public boolean clientDebugEnabled = false;
         public boolean frostWalkerEnabled = false;
         public boolean infinityCooldownEnabled = false;
+
+        // === 玩家行为日志 ===
+        public boolean playerBehaviorLogEnabled = false;
     }
 
     /** 加载配置，如果文件不存在则使用默认值并创建文件 */
@@ -98,6 +102,15 @@ public class ModConfig {
 
     public static void setEntityHealthHudReachDistance(double distance) {
         data.entityHealthHudReachDistance = distance;
+        save();
+    }
+
+    public static boolean isEntityHealthHudDetailedInfo() {
+        return data.entityHealthHudDetailedInfo;
+    }
+
+    public static void setEntityHealthHudDetailedInfo(boolean enabled) {
+        data.entityHealthHudDetailedInfo = enabled;
         save();
     }
 
@@ -201,6 +214,17 @@ public class ModConfig {
 
     public static void setInfinityCooldownEnabled(boolean enabled) {
         data.infinityCooldownEnabled = enabled;
+        save();
+    }
+
+    // ==================== 玩家行为日志 ====================
+
+    public static boolean isPlayerBehaviorLogEnabled() {
+        return data.playerBehaviorLogEnabled;
+    }
+
+    public static void setPlayerBehaviorLogEnabled(boolean enabled) {
+        data.playerBehaviorLogEnabled = enabled;
         save();
     }
 }

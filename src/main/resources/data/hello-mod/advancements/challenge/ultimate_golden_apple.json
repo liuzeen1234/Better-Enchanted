@@ -1,0 +1,23 @@
+{
+  "parent": "minecraft:story/enchant_item",
+  "display": {
+    "icon": {
+      "item": "hello-mod:super_enchanted_golden_apple"
+    },
+    "title": {
+      "translate": "advancements.hello-mod.ultimate_golden_apple.title"
+    },
+    "description": {
+      "translate": "advancements.hello-mod.ultimate_golden_apple.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}
