@@ -19,12 +19,17 @@
         "LoyaltyCollisionMixin",
         "SuperAppleCraftingMixin",
         "SuperAppleAnvilMixin",
-        "AdvancementRewardMixin"
+        "AdvancementRewardMixin",
+        "PlayerBehaviorLogMixin",
+        "PlayerBlockInteractLogMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin",
         "client.SwiftThrowRenderMixin",
-        "client.SuperAppleAttackMixin"
+        "client.SuperAppleAttackMixin",
+        "client.BehaviorLogClientMixin",
+        "client.BehaviorLogKeyboardMixin",
+        "client.BehaviorLogMouseMixin"
     ],
     "injectors": {
         "defaultRequire": 1

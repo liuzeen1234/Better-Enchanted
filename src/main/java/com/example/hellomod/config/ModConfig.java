@@ -45,6 +45,9 @@ public class ModConfig {
         public boolean clientDebugEnabled = false;
         public boolean frostWalkerEnabled = false;
         public boolean infinityCooldownEnabled = false;
+
+        // === 玩家行为日志 ===
+        public boolean playerBehaviorLogEnabled = false;
     }
 
     /** 加载配置，如果文件不存在则使用默认值并创建文件 */
@@ -211,6 +214,17 @@ public class ModConfig {
 
     public static void setInfinityCooldownEnabled(boolean enabled) {
         data.infinityCooldownEnabled = enabled;
+        save();
+    }
+
+    // ==================== 玩家行为日志 ====================
+
+    public static boolean isPlayerBehaviorLogEnabled() {
+        return data.playerBehaviorLogEnabled;
+    }
+
+    public static void setPlayerBehaviorLogEnabled(boolean enabled) {
+        data.playerBehaviorLogEnabled = enabled;
         save();
     }
 }
