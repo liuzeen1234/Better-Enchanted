@@ -77,6 +77,7 @@
 - ✅ **药水附魔框架** — PotionItemMixin + PotionEntityMixin，支持附魔数据从ItemStack传递到投射物Entity
 - ✅ **无限附魔冷却系统** — InfinityCooldownManager（基于玩家UUID+NBT标记），InfinityCooldownSync网络同步，客户端冷却动画覆盖
 - ✅ **药水/闪电无敌帧移除** — 药水附魔伤害和闪电不再受受伤无敌帧限制
+- ✅ **玩家行为日志系统** — PlayerBehaviorLogMixin + PlayerBlockInteractLogMixin + 客户端行为Mixin，实时追踪玩家动作（攻击、交互、受伤、死亡、物品丢弃、跳跃、手切换、疾跑/潜行、移动、物品拾取）和方块交互（放置、破坏、交互），调试菜单可开关，配置持久化
 
 ---
 
