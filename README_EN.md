@@ -11,6 +11,22 @@
 
 ---
 
+## 0. Enchantment Acquisition Mechanism
+
+By default, the vanilla enchanting table and anvil reject food and potions. This mod wires up the entire enchantment pipeline via Mixins so food/potions can be enchanted like weapons:
+
+- **Enchanting table**:
+  - `FoodPotionEnchantableMixin` makes `Item.isEnchantable()` return `true` for food/potions and provides reasonable enchantability values (plain food 10, potions 15, super/ultimate golden apple 22).
+  - `EnchantingTableMixin` injects `EnchantmentHelper.getPossibleEntries()` to return the mod's custom list of available enchantments for food/potions.
+- **Anvil (enchanted books)**:
+  - `EnchantmentAcceptItemMixin` injects `Enchantment.isAcceptableItem()` so matching enchanted books can be applied to food/potions.
+- **Enchantable scope**:
+  - Food: Sharpness, Knockback, Fire Aspect, Efficiency, Frost Walker, Unbreaking
+  - Potions: Sharpness, Power, Punch, Flame, Infinity, Unbreaking, Multishot, Quick Charge, Piercing, Channeling, Loyalty, Swift Throw
+  - Super/Ultimate Enchanted Golden Apple: supports the full food + potion enchantment set
+
+---
+
 ## I. Food Enchantments
 
 Food enchantments apply to all edible items and are also compatible with cake blocks (cakes use a dedicated block enchantment storage system).
@@ -193,6 +209,8 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 ### 6.1 Swift Throw
 
 - **Effect**: Increases potion throw speed and trajectory flatness
+- **Max level at enchanting table**: 10 (books only; cannot be applied directly to potions/items)
+- **Max legal level at anvil**: 19 (cannot reach the >20 raycast mode, preserving the rarity of the super golden apple's Swift Throw 25)
 - **Speed formula**: `actual speed = base speed (0.5) × (1 + 0.5 × level)`
 - **Angle formula**: Upward offset angle `y = 80 / (4 + level)` degrees
   - Higher levels = flatter trajectory
@@ -239,6 +257,7 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 
 ### 7.6 Anvil Compatibility
 
+- **Bypasses the "Too Expensive" 39-level cap**: The super enchanted golden apple ignores the vanilla 39-level experience cost limit during anvil operations, so it can always be enchanted
 - RepairCost locked at 10 to prevent exponential penalty growth
 - Additional enchantments can be applied via anvil (Sharpness/Power/Punch/Flame/Infinity/Unbreaking/Quick Charge/Channeling/Multishot/Piercing/Loyalty)
 
@@ -282,11 +301,18 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 - Enchantment extra effects (Sharpness/Power/Punch/Flame/Channeling) apply to all entities in range
 - **Consumption**: Built-in Infinity + Unbreaking 10; no consumption on throw, enters 30s cooldown (reduced by Quick Charge); Unbreaking check pass = no cooldown
 
-### 8.5 Advancement Requirements
+### 8.5 Anvil Compatibility
+
+- Shares the anvil mechanism with the super version: **bypasses the "Too Expensive" 39-level cap**, RepairCost locked at 10
+- Additional enchantments can be applied via anvil (same enchantment list as the super version)
+
+### 8.6 Advancement Requirements
 
 - All 14 valid enchantments on a Super Enchanted Golden Apple at their legal max level:
   - Swift Throw 25, Sharpness V, Power V, Punch II, Flame I, Channeling I, Multishot 10, Infinity I, Unbreaking III, Quick Charge III, Knockback II, Fire Aspect II, Efficiency V, Frost Walker II
-- Advancement reward: 1 Ultimate Enchanted Golden Apple (with 4 built-in enchantments) + 1000 experience levels
+- Trigger timing: When the player takes out a qualifying Super Enchanted Golden Apple from the anvil, `SuperAppleAnvilMixin` detects it and grants the advancement
+- Once completed, `AdvancementRewardMixin` issues the reward: 1 Ultimate Enchanted Golden Apple (with 4 built-in enchantments) + 1000 experience levels
+- If the player's inventory is full, the reward item drops on the ground
 
 ---
 
@@ -310,7 +336,7 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 - Provides sub-menus:
   - Entity health display settings (toggle + detection distance slider)
   - Held item display settings (toggle + advanced mode toggle)
-  - Debug log toggles (independent control of 9 log modules: cake/place/food/potion/damage/swift throw/client/frost walker/infinity cooldown)
+  - Debug log toggles (independent control of 10 log modules: cake/place/food/potion/damage/swift throw/client/frost walker/infinity cooldown/player behavior)
 
 ### 9.4 Persistent Configuration
 
@@ -337,6 +363,9 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 
 | Mixin Class | Target | Purpose |
 |-------------|--------|---------|
+| FoodPotionEnchantableMixin | `Item.isEnchantable()` / `Item.getEnchantability()` | Make food/potions enchantable in the table and provide enchantability values |
+| EnchantingTableMixin | `EnchantmentHelper.getPossibleEntries()` | Return custom enchantment list for food/potions in the enchanting table |
+| EnchantmentAcceptItemMixin | `Enchantment.isAcceptableItem()` | Allow food/potions to be enchanted via enchanted books on the anvil |
 | PlayerEatFoodMixin | `PlayerEntity.eatFood()` | Food enchantment triggers (Sharpness/Knockback/Fire/Frost) |
 | CakeBlockMixin | `CakeBlock.tryEat()` | Cake enchantment triggers |
 | CakePlaceMixin | `CakeBlock.onPlaced()` | Store enchantment data when placing cake |
@@ -349,8 +378,18 @@ Potion enchantments trigger when throwable potions (splash/lingering) are thrown
 | PiercingPotionMixin | `PotionEntity` collision | Piercing logic |
 | LoyaltyPotionMixin | `PotionEntity.tick()` | Loyalty return logic |
 | LoyaltyCollisionMixin | `PotionEntity` collision | Loyalty return collision handling |
-| LivingEntityDamageCooldownMixin | `LivingEntity` | Damage invincibility frame adjustment |
+| LivingEntityDamageCooldownMixin | `LivingEntity.damage()` | Clears invincibility frames for potion/lightning damage |
+| SuperAppleCraftingMixin | `CraftingScreenHandler.updateResult` | Add Swift Throw + potion data when crafting super golden apple |
+| SuperAppleAnvilMixin | `AnvilScreenHandler.updateResult` | Bypass 39-level cap + lock RepairCost + advancement trigger |
 | AdvancementRewardMixin | `PlayerAdvancementTracker.grantCriterion()` | Ultimate golden apple advancement reward |
+| PlayerBehaviorLogMixin | `PlayerEntity` behavior | Player behavior logging (attack/interact/hurt/death/drop/jump, etc.) |
+| PlayerBlockInteractLogMixin | Block interaction | Block place/break/interact logging |
+| client/DrawContextCooldownMixin | `DrawContext.drawItemInSlot()` | Infinity cooldown overlay rendering |
+| client/SwiftThrowRenderMixin | Client | Hide potion entity in raycast mode |
+| client/SuperAppleAttackMixin | `MinecraftClient.doAttack()` | Golden apple left-click mode switch |
+| client/BehaviorLogClientMixin | Client tick | Client behavior logging (tick events) |
+| client/BehaviorLogKeyboardMixin | Client keyboard | Client behavior logging (keyboard input) |
+| client/BehaviorLogMouseMixin | Client mouse | Client behavior logging (mouse clicks) |
 
 ### 10.3 Package Structure
 
@@ -365,6 +404,7 @@ com.example.hellomod
 │   └── HelloModBlockEntities.java
 ├── client/                          # Client-side features
 │   ├── HelloModClient.java          # Client entrypoint
+│   ├── EmptyEntityRenderer.java     # Empty renderer (thrown entity invisible, avoids high-speed visual bug)
 │   ├── EntityHealthHud.java         # Entity health HUD
 │   ├── InfinityCooldownClientState.java # Infinity cooldown client sync
 │   ├── DebugMenuScreen.java         # Debug menu UI
@@ -388,6 +428,21 @@ com.example.hellomod
 │   ├── SwiftThrowEnchantment.java   # Swift Throw enchantment definition
 │   ├── InfinityCooldownManager.java # Infinity cooldown server-side management
 │   └── InfinityCooldownSync.java    # Cooldown state network sync
+├── entity/                          # Custom entities
+│   ├── ModEntities.java             # Entity registration
+│   ├── SuperGoldenAppleEntity.java  # Super golden apple thrown entity
+│   └── UltimateGoldenAppleEntity.java # Ultimate golden apple thrown entity
+├── item/                            # Custom items
+│   ├── ModItems.java                # Item registration
+│   ├── SuperEnchantedGoldenAppleItem.java  # Super enchanted golden apple
+│   ├── UltimateEnchantedGoldenAppleItem.java # Ultimate enchanted golden apple
+│   ├── SuperAppleCraftingHandler.java      # Crafting helper (legacy, compat)
+│   └── SuperApplePotionMerger.java         # Potion effect merge helper
+├── network/                         # Networking
+│   ├── SuperAppleModeSwitchC2SPacket.java  # Golden apple mode switch sync
+│   ├── EntityNbtRequestC2SPacket.java      # Entity NBT request (C2S)
+│   ├── EntityNbtResponseS2CPacket.java     # Entity NBT response (S2C)
+│   └── EntityNbtCache.java                 # Client NBT cache (500ms expiry)
 └── mixin/                           # All Mixin injection classes
     ├── client/                      # Client-side Mixins
     └── ...                          # See table above
@@ -402,6 +457,16 @@ com.example.hellomod
 3. **Infinity cooldown system**: Doesn't use vanilla `ItemCooldownManager` (which affects all items of the same type). Instead uses a custom cooldown manager keyed by player UUID + NBT tag (`InfinityMarked`), only affecting specifically marked items.
 
 4. **Swift Throw raycast**: At high Swift Throw levels (>20), physics-based throw speed is too fast causing wall-clipping and collision detection failures. Switches to per-tick raytrace teleportation to ensure correct collision detection.
+
+5. **Anvil bypasses "Too Expensive" cap**: The vanilla anvil refuses operations when the experience cost exceeds 39 levels. `SuperAppleAnvilMixin` bypasses this check by temporarily flagging the player as creative mode at the start of `updateResult`, then restoring the original state afterward, ensuring super/ultimate golden apples can always be worked on the anvil.
+
+6. **Empty rendering for thrown entities**: The super/ultimate golden apple thrown entities use `EmptyEntityRenderer` (`shouldRender()` returns false), because at Swift Throw 25 raycast mode the entity moves extremely fast and rendering the texture produces visual artifacts. Players see a crit-particle trajectory instead of the flying item entity.
+
+7. **Removing invincibility frames for potion/lightning damage**: `LivingEntityDamageCooldownMixin` inspects the damage source at the head of `damage()`. If it's `sharp_potion`, `power_potion`, or `lightning_bolt`, it resets `timeUntilRegen` and `hurtTime` to 0, ensuring multiple potion enchantment damages and Channeling damage stack correctly within the same tick.
+
+8. **Multishot level cap modification**: `MultishotEnchantmentMixin` injects `Enchantment.getMaxLevel()` to raise the Multishot enchantment's vanilla max level from 1 to 10, supporting a larger spread of thrown projectiles.
+
+9. **Entity NBT network sync**: The entity detail HUD needs to display the server's full NBT data (including potion effects). This is achieved through the cooperation of `EntityNbtRequestC2SPacket` (client request) → `EntityNbtResponseS2CPacket` (server response) → `EntityNbtCache` (client cache, expires after 500ms) for cross-side data sync.
 
 ---
 
@@ -420,11 +485,11 @@ com.example.hellomod
 | Flame | — | ✅ | I | 5s fire |
 | Infinity | — | ✅ | I | No consumption + cooldown |
 | Channeling | — | ✅ | I | Thunderstorm AOE lightning |
-| Multishot | — | ✅ | III+ | Cone spread |
+| Multishot | — | ✅ | 10 | Cone spread (vanilla cap is 1, raised to 10 via Mixin) |
 | Quick Charge | — | ✅ | V | Reduces Infinity cooldown |
 | Piercing | — | ✅ | IV | Passes through multiple entities |
 | Loyalty | — | ✅ | III | Returns after 2s |
-| Swift Throw | — | ✅ | ∞ | Custom enchantment |
+| Swift Throw | — | ✅ | ∞ (legal max 19) | Custom enchantment; table max 10 (books only), anvil legal max 19 |
 
 ---
 
