@@ -1,5 +1,6 @@
 package com.example.hellomod.mixin;
 
+import com.example.hellomod.enchantment.EnchantingTableHelper;
 import com.example.hellomod.item.SuperEnchantedGoldenAppleItem;
 import com.example.hellomod.item.UltimateEnchantedGoldenAppleItem;
 import net.minecraft.enchantment.EnchantmentHelper;

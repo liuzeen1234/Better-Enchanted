@@ -1,6 +1,5 @@
-package com.example.hellomod.mixin;
+package com.example.hellomod.enchantment;
 
-import com.example.hellomod.enchantment.ModEnchantments;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.enchantment.Enchantments;
