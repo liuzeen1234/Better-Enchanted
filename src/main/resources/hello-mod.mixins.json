@@ -21,7 +21,10 @@
         "SuperAppleAnvilMixin",
         "AdvancementRewardMixin",
         "PlayerBehaviorLogMixin",
-        "PlayerBlockInteractLogMixin"
+        "PlayerBlockInteractLogMixin",
+        "EnchantingTableMixin",
+        "EnchantmentAcceptItemMixin",
+        "FoodPotionEnchantableMixin"
     ],
     "client": [
         "client.DrawContextCooldownMixin",

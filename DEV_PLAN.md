@@ -1,11 +1,17 @@
 # More Good Enchanted - 开发计划
 
-> Fabric Mod / Minecraft 1.20.4 / Java 17  
+> Fabric Mod / Minecraft 1.20.1 / Java 17  
 > 核心思路：将原版附魔效果迁移到食物和药水上，让食物/药水也能拥有附魔能力。
 
 ---
 
 ## 当前进度
+
+### 零、附魔获取机制（已完成）
+
+- ✅ **附魔台支持食物/药水** — `FoodPotionEnchantableMixin` 让 `Item.isEnchantable()` 对食物/药水返回 true 并提供 enchantability（食物10/药水15/超级·终极金苹果22）；`EnchantingTableMixin` 注入 `EnchantmentHelper.getPossibleEntries()` 返回自定义可用附魔列表
+- ✅ **铁砧附魔书支持食物/药水** — `EnchantmentAcceptItemMixin` 注入 `Enchantment.isAcceptableItem()`，让附魔书可附到食物/药水上
+- ✅ **可附魔范围** — 食物：锋利/击退/火焰附加/效率/冰霜行者/耐久；药水：锋利/力量/冲击/火矢/无限/耐久/多重射击/快速装填/穿透/引雷/忠诚/迅投；超级·终极金苹果同时支持食物+药水全部附魔
 
 ### 一、食物类附魔（已完成）
 
@@ -134,6 +140,9 @@
 6. **终极附魔金苹果**：详见 `ULTIMATE_GOLDEN_APPLE_DESIGN.md`
 
 7. **Mixin 注入点**：
+   - 附魔台可用：`FoodPotionEnchantableMixin` → `Item.isEnchantable()` / `Item.getEnchantability()`
+   - 附魔台候选：`EnchantingTableMixin` → `EnchantmentHelper.getPossibleEntries()`
+   - 铁砧附魔书：`EnchantmentAcceptItemMixin` → `Enchantment.isAcceptableItem()`
    - 食物食用：`PlayerEatFoodMixin` → `PlayerEntity.eatFood()`
    - 食用速度：`EfficientEatingMixin` → `Item.getMaxUseTime()`
    - 食物耐久：`UnbreakingFoodMixin`
@@ -151,3 +160,5 @@
    - 无敌帧：`LivingEntityDamageCooldownMixin`
    - 冷却覆盖渲染：`DrawContextCooldownMixin`（客户端）
    - 进度奖励：`AdvancementRewardMixin` → `PlayerAdvancementTracker.grantCriterion()`
+   - 玩家行为日志：`PlayerBehaviorLogMixin` + `PlayerBlockInteractLogMixin`
+   - 客户端行为日志：`BehaviorLogClientMixin` + `BehaviorLogKeyboardMixin` + `BehaviorLogMouseMixin`（客户端）

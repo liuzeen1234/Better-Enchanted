@@ -1,6 +1,6 @@
 # Better Enchanted
 
-> Fabric Mod | Minecraft 1.20.4 | Java 17  
+> Fabric Mod | Minecraft 1.20.1 | Java 17  
 > 将原版附魔效果迁移到食物和药水上，让食物与药水也能拥有附魔能力。
 
 ---
@@ -8,6 +8,22 @@
 ## 模组简介
 
 **Better Enchanted** 是一个 Minecraft Fabric 模组，核心玩法是将原版武器、弓、弩、三叉戟等装备的附魔效果创造性地应用到食物和投掷药水上。食物附魔在食用时对食用者生效，药水附魔在投掷命中时对目标生效。所有效果的数值公式尽可能参考 MC 1.20.4 原版附魔机制，确保平衡性和一致性。
+
+---
+
+## 零、附魔获取机制
+
+原版附魔台与铁砧默认不接受食物和药水，本模组通过 Mixin 打通了整条附魔链路，让食物/药水可以像武器一样被附魔：
+
+- **附魔台附魔**：
+  - `FoodPotionEnchantableMixin` 让 `Item.isEnchantable()` 对食物/药水返回 `true`，并提供合理的 enchantability 值（普通食物 10、药水 15、超级/终极金苹果 22）。
+  - `EnchantingTableMixin` 注入 `EnchantmentHelper.getPossibleEntries()`，对食物/药水返回本模组定义的可用附魔列表。
+- **铁砧附魔（附魔书）**：
+  - `EnchantmentAcceptItemMixin` 注入 `Enchantment.isAcceptableItem()`，让对应附魔书可以附到食物/药水上。
+- **可附魔范围**：
+  - 食物：锋利、击退、火焰附加、效率、冰霜行者、耐久
+  - 药水：锋利、力量、冲击、火矢、无限、耐久、多重射击、快速装填、穿透、引雷、忠诚、迅投
+  - 超级/终极附魔金苹果：同时支持食物 + 药水的全部附魔
 
 ---
 
@@ -320,7 +336,7 @@
 - 提供以下子菜单：
   - 实体血量显示设置（开关 + 检测距离调节）
   - 手持物品显示设置（开关 + 高级模式开关）
-  - 调试日志开关（独立控制蛋糕/放置/食物/药水/伤害/迅投/客户端/冰霜行者/无限冷却共9个日志模块）
+  - 调试日志开关（独立控制蛋糕/放置/食物/药水/伤害/迅投/客户端/冰霜行者/无限冷却/玩家行为共10个日志模块）
 
 ### 9.4 配置持久化
 
@@ -336,17 +352,20 @@
 
 | 组件 | 技术选型 |
 |------|----------|
-| Mod框架 | Fabric Loader 0.15.3 + Fabric API 0.97.1 |
-| 游戏版本 | Minecraft 1.20.4 |
+| Mod框架 | Fabric Loader 0.15.11 + Fabric API 0.92.2 |
+| 游戏版本 | Minecraft 1.20.1 |
 | Java版本 | Java 17 |
 | 构建工具 | Gradle + Fabric Loom 1.7 |
 | 代码修改 | Mixin 注入 |
-| 映射表 | Yarn 1.20.4+build.3:v2 |
+| 映射表 | Yarn 1.20.1+build.10:v2 |
 
 ### 10.2 Mixin 注入点
 
 | Mixin 类 | 目标 | 用途 |
 |-----------|------|------|
+| FoodPotionEnchantableMixin | `Item.isEnchantable()` / `Item.getEnchantability()` | 让食物/药水可进入附魔台并提供 enchantability 值 |
+| EnchantingTableMixin | `EnchantmentHelper.getPossibleEntries()` | 附魔台对食物/药水返回自定义可用附魔列表 |
+| EnchantmentAcceptItemMixin | `Enchantment.isAcceptableItem()` | 让食物/药水在铁砧上可通过附魔书获得附魔 |
 | PlayerEatFoodMixin | `PlayerEntity.eatFood()` | 食物附魔效果触发（锋利/击退/火焰/冰霜） |
 | CakeBlockMixin | `CakeBlock.tryEat()` | 蛋糕附魔效果触发 |
 | CakePlaceMixin | `CakeBlock.onPlaced()` | 放置蛋糕时存储附魔数据 |
@@ -363,9 +382,14 @@
 | SuperAppleCraftingMixin | `CraftingScreenHandler.updateResult` | 超级金苹果合成时添加迅投+药水数据 |
 | SuperAppleAnvilMixin | `AnvilScreenHandler.updateResult` | 铁砧无视39级上限+RepairCost锁定+进度触发 |
 | AdvancementRewardMixin | `PlayerAdvancementTracker.grantCriterion()` | 终极金苹果进度完成奖励发放 |
+| PlayerBehaviorLogMixin | `PlayerEntity` 行为 | 玩家行为日志（攻击/交互/受伤/死亡/丢弃/跳跃等） |
+| PlayerBlockInteractLogMixin | 方块交互 | 方块放置/破坏/交互日志 |
 | client/DrawContextCooldownMixin | `DrawContext.drawItemInSlot()` | 无限冷却覆盖渲染 |
 | client/SwiftThrowRenderMixin | 客户端 | 射线追踪模式隐藏药水实体 |
 | client/SuperAppleAttackMixin | `MinecraftClient.doAttack()` | 金苹果左键模式切换 |
+| client/BehaviorLogClientMixin | 客户端 tick | 客户端行为日志（tick 事件） |
+| client/BehaviorLogKeyboardMixin | 客户端键盘 | 客户端行为日志（键盘输入） |
+| client/BehaviorLogMouseMixin | 客户端鼠标 | 客户端行为日志（鼠标点击） |
 
 ### 10.3 包结构
 
@@ -471,7 +495,7 @@ com.example.hellomod
 
 ## 十二、运行环境与依赖
 
-- **Minecraft**：1.20.4
+- **Minecraft**：1.20.1
 - **Fabric Loader**：≥ 0.15.0
 - **Fabric API**：任意兼容版本
 - **Java**：≥ 17
