@@ -4,6 +4,9 @@
     "package": "com.example.hellomod.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "EnchantmentAcceptItemMixin",
+        "EnchantingTableMixin",
+        "FoodPotionEnchantableMixin",
         "PlayerEatFoodMixin",
         "CakeBlockMixin",
         "CakePlaceMixin",
