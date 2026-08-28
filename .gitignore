@@ -17,6 +17,9 @@ Thumbs.db
 # Docs
 VIDEO_SCRIPT.md
 
+# Debug Menu (standalone project, tracked separately)
+debug-menu/
+
 # Misc
 calc_anvil.ps1
 unnamed.png
