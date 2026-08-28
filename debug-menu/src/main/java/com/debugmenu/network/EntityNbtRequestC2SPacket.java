@@ -1,6 +1,6 @@
-package com.example.hellomod.network;
+package com.debugmenu.network;
 
-import com.example.hellomod.HelloMod;
+import com.debugmenu.DebugMenuMod;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -22,7 +22,7 @@ import java.util.Collection;
  */
 public class EntityNbtRequestC2SPacket {
 
-    public static final Identifier CHANNEL = new Identifier(HelloMod.MOD_ID, "entity_nbt_request");
+    public static final Identifier CHANNEL = new Identifier(DebugMenuMod.MOD_ID, "entity_nbt_request");
 
     /**
      * 客户端发送请求，指定实体 ID。
@@ -49,14 +49,14 @@ public class EntityNbtRequestC2SPacket {
         Entity entity = player.getServerWorld().getEntityById(entityId);
         if (entity == null) return;
 
-        // 限制距离防止滥用（与客户端检测距离配置无关，这里用256格作为上限）
+        // 限制距离防止滥用
         if (player.squaredDistanceTo(entity) > 256 * 256) return;
 
         // 获取完整 NBT
         NbtCompound nbt = new NbtCompound();
         entity.writeNbt(nbt);
 
-        // 补充药水效果（服务端能完整获取）
+        // 补充药水效果
         if (entity instanceof LivingEntity living) {
             Collection<StatusEffectInstance> effects = living.getStatusEffects();
             NbtList effectList = new NbtList();

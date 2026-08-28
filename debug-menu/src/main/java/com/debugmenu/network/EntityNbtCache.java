@@ -1,4 +1,4 @@
-package com.example.hellomod.network;
+package com.debugmenu.network;
 
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.Nullable;

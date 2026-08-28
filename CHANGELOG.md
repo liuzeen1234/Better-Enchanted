@@ -1,5 +1,51 @@
 # 更新日志
 
+## v1.2.0（相对于 v1.1.1）
+
+### 架构重构
+
+#### 调试菜单拆分为独立 Mod
+- 将调试菜单、HUD 显示、行为日志系统从主 Mod 中完全剥离，迁移至独立的 **debug-menu** Mod
+- 主 Mod 不再包含任何 UI 屏幕（DebugMenuScreen、HealthHudSettingScreen 等）、HUD 渲染（EntityHealthHud、ItemCountHud）、行为日志 Mixin（5个）、实体 NBT 网络同步包
+- 新增 Debug Menu API：任何 Mod 可通过 `DebugMenuApi.register()` 注册调试开关，由 debug-menu Mod 统一管理和展示
+- 主 Mod 通过 `FabricLoader.isModLoaded("debug-menu")` 检测，仅在调试 Mod 存在时注册调试开关
+- 未安装 debug-menu 时主 Mod 正常运行，调试日志默认全关，无任何额外开销
+
+### 删除的文件（从主 Mod 移除）
+
+- `client/DebugMenuScreen.java` — 调试菜单 UI
+- `client/DebugLogSettingScreen.java` — 日志开关设置 UI
+- `client/HealthHudSettingScreen.java` — 血量 HUD 设置 UI
+- `client/ItemHudSettingScreen.java` — 物品 HUD 设置 UI
+- `client/EntityHealthHud.java` — 实体血量 HUD 渲染
+- `config/ModConfig.java` — 旧配置管理（拆分为 DebugLogConfig 独立管理）
+- `network/EntityNbtRequestC2SPacket.java` — 实体 NBT 请求包
+- `network/EntityNbtResponseS2CPacket.java` — 实体 NBT 响应包
+- `network/EntityNbtCache.java` — 客户端 NBT 缓存
+- `mixin/PlayerBehaviorLogMixin.java` — 玩家行为日志（服务端）
+- `mixin/PlayerBlockInteractLogMixin.java` — 方块交互日志（服务端）
+- `mixin/client/BehaviorLogClientMixin.java` — 客户端界面日志
+- `mixin/client/BehaviorLogKeyboardMixin.java` — 客户端键盘日志
+- `mixin/client/BehaviorLogMouseMixin.java` — 客户端鼠标日志
+
+### 新增文件
+
+- `DebugToggleRegistration.java` — 可选的调试开关注册（仅在 debug-menu 存在时生效）
+- `com/debugmenu/api/DebugMenuApi.java` — API 存根
+- `com/debugmenu/api/DebugToggleEntry.java` — API 存根
+
+### 配置变更
+
+- 调试日志开关从 `config/hello-mod.json` 迁移至 `config/better-enchanted-debug.json`
+- HUD 设置迁移至 debug-menu Mod 的 `config/debug-menu.json`
+
+### 体积优化
+
+- 主 Mod 减少 14 个 Java 源文件、5 个 Mixin 注入点
+- 预计 jar 体积减小约 30-40%
+
+---
+
 ## v1.1.1（相对于 v1.1.0）
 
 ### 新功能

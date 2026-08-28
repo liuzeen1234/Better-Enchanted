@@ -1,32 +1,28 @@
 {
     "schemaVersion": 1,
-    "id": "hello-mod",
+    "id": "debug-menu",
     "version": "${version}",
-    "name": "Better Enchanted",
-    "description": "Bring enchantment effects to food and potions.",
+    "name": "Debug Menu",
+    "description": "A standalone debug menu mod that provides HUD overlays, debug log toggles, and behavior logging. Other mods can register their own debug toggles via the API.",
     "authors": ["You"],
     "contact": {},
     "license": "MIT",
-    "icon": "assets/hello-mod/icon.png",
     "environment": "*",
     "entrypoints": {
         "main": [
-            "com.example.hellomod.HelloMod"
+            "com.debugmenu.DebugMenuMod"
         ],
         "client": [
-            "com.example.hellomod.client.HelloModClient"
+            "com.debugmenu.client.DebugMenuClient"
         ]
     },
     "mixins": [
-        "hello-mod.mixins.json"
+        "debug-menu.mixins.json"
     ],
     "depends": {
         "fabricloader": ">=0.15.0",
         "minecraft": "~1.20.4",
         "java": ">=17",
         "fabric-api": "*"
-    },
-    "suggests": {
-        "debug-menu": "*"
     }
 }

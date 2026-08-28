@@ -1,6 +1,6 @@
-package com.example.hellomod.mixin.client;
+package com.debugmenu.mixin.client;
 
-import com.example.hellomod.debug.DebugLogConfig;
+import com.debugmenu.api.DebugMenuApi;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
@@ -16,42 +16,37 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * 客户端键盘输入行为日志 Mixin。
- * 跟踪玩家的按键操作（按下/释放）。
- * 仅记录游戏内按键（非界面打字），避免刷屏。
+ * 跟踪玩家的按键操作。
  */
 @Mixin(Keyboard.class)
 public abstract class BehaviorLogKeyboardMixin {
 
     @Unique
-    private static final Logger LOGGER = LoggerFactory.getLogger("BetterEnchanted");
+    private static final Logger debug_menu$LOGGER = LoggerFactory.getLogger("DebugMenu");
+
+    @Unique
+    private static final String debug_menu$BEHAVIOR_LOG_KEY = "behavior_log";
 
     @Shadow
     @Final
     private MinecraftClient client;
 
-    /**
-     * 按键事件记录
-     */
     @Inject(method = "onKey", at = @At("HEAD"))
-    private void onKeyPress(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
-        if (!DebugLogConfig.isPlayerBehaviorLogEnabled()) return;
+    private void debug_menu$onKeyPress(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
+        if (!DebugMenuApi.isEnabled(debug_menu$BEHAVIOR_LOG_KEY)) return;
         if (client.player == null) return;
 
-        // 只记录按下事件（action=1），不记录释放和重复
         if (action != GLFW.GLFW_PRESS) return;
-
-        // 如果在界面中输入文字，不记录（由界面日志覆盖）
         if (client.currentScreen != null) return;
 
-        String keyName = hello_mod$getKeyName(key);
+        String keyName = debug_menu$getKeyName(key);
         if (keyName != null) {
-            LOGGER.info("[BehaviorLog] 按键: {}", keyName);
+            debug_menu$LOGGER.info("[BehaviorLog] 按键: {}", keyName);
         }
     }
 
     @Unique
-    private String hello_mod$getKeyName(int key) {
-        // 只记录有意义的游戏按键，忽略修饰键等
+    private String debug_menu$getKeyName(int key) {
         return switch (key) {
             case GLFW.GLFW_KEY_W -> "W (前进)";
             case GLFW.GLFW_KEY_S -> "S (后退)";
@@ -80,7 +75,7 @@ public abstract class BehaviorLogKeyboardMixin {
             case GLFW.GLFW_KEY_7 -> "7 (快捷栏)";
             case GLFW.GLFW_KEY_8 -> "8 (快捷栏)";
             case GLFW.GLFW_KEY_9 -> "9 (快捷栏)";
-            default -> null; // 其他按键不记录
+            default -> null;
         };
     }
 }

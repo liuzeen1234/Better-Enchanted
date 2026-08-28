@@ -1,6 +1,6 @@
-package com.example.hellomod.network;
+package com.debugmenu.network;
 
-import com.example.hellomod.HelloMod;
+import com.debugmenu.DebugMenuMod;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -14,7 +14,7 @@ import net.minecraft.util.Identifier;
  */
 public class EntityNbtResponseS2CPacket {
 
-    public static final Identifier CHANNEL = new Identifier(HelloMod.MOD_ID, "entity_nbt_response");
+    public static final Identifier CHANNEL = new Identifier(DebugMenuMod.MOD_ID, "entity_nbt_response");
 
     /**
      * 服务端发送响应给指定玩家。

@@ -1,8 +1,8 @@
-package com.example.hellomod.client;
+package com.debugmenu.client;
 
-import com.example.hellomod.config.ModConfig;
-import com.example.hellomod.network.EntityNbtCache;
-import com.example.hellomod.network.EntityNbtRequestC2SPacket;
+import com.debugmenu.config.DebugMenuConfig;
+import com.debugmenu.network.EntityNbtCache;
+import com.debugmenu.network.EntityNbtRequestC2SPacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -21,32 +21,31 @@ import net.minecraft.util.math.Vec3d;
  * 格式：[实体名称][当前血量/最大血量]
  * 当指向无血量实体时显示：[实体名称][-/-]
  * 显示位置：画面右上角
- * 可通过按键开关显示。
  */
 public class EntityHealthHud {
 
     public static boolean isEnabled() {
-        return ModConfig.isEntityHealthHudEnabled();
+        return DebugMenuConfig.isEntityHealthHudEnabled();
     }
 
     public static void toggle() {
-        ModConfig.setEntityHealthHudEnabled(!ModConfig.isEntityHealthHudEnabled());
+        DebugMenuConfig.setEntityHealthHudEnabled(!DebugMenuConfig.isEntityHealthHudEnabled());
     }
 
     public static double getReachDistance() {
-        return ModConfig.getEntityHealthHudReachDistance();
+        return DebugMenuConfig.getEntityHealthHudReachDistance();
     }
 
     public static void setReachDistance(double distance) {
-        ModConfig.setEntityHealthHudReachDistance(distance);
+        DebugMenuConfig.setEntityHealthHudReachDistance(distance);
     }
 
     public static boolean isDetailedInfoEnabled() {
-        return ModConfig.isEntityHealthHudDetailedInfo();
+        return DebugMenuConfig.isEntityHealthHudDetailedInfo();
     }
 
     public static void toggleDetailedInfo() {
-        ModConfig.setEntityHealthHudDetailedInfo(!ModConfig.isEntityHealthHudDetailedInfo());
+        DebugMenuConfig.setEntityHealthHudDetailedInfo(!DebugMenuConfig.isEntityHealthHudDetailedInfo());
     }
 
     public static void render(DrawContext drawContext, float tickDelta) {
@@ -66,7 +65,6 @@ public class EntityHealthHud {
             float maxHealth = living.getMaxHealth();
             text = String.format("[%s][%.1f/%.1f]", name, currentHealth, maxHealth);
         } else {
-            // 无血量实体显示 [-/-]
             text = String.format("[%s][-/-]", name);
         }
 
@@ -74,14 +72,11 @@ public class EntityHealthHud {
         int screenWidth = client.getWindow().getScaledWidth();
         int textWidth = textRenderer.getWidth(text);
 
-        // 右上角，留出 4px 边距
         int x = screenWidth - textWidth - 4;
         int y = 4;
 
-        // 绘制带阴影的文字，颜色为红色
         drawContext.drawText(textRenderer, text, x, y, 0xFF5555, true);
 
-        // 显示详细NBT信息（参考高级物品显示格式）
         if (isDetailedInfoEnabled()) {
             renderDetailedInfo(drawContext, textRenderer, target, screenWidth, y + 14);
         }
@@ -95,16 +90,13 @@ public class EntityHealthHud {
     private static void renderDetailedInfo(DrawContext drawContext, TextRenderer textRenderer, Entity target, int screenWidth, int startY) {
         int entityId = target.getId();
 
-        // 从缓存获取服务端同步的 NBT 数据
         NbtCompound nbt = EntityNbtCache.get(entityId);
 
-        // 如果缓存为空或过期，发送请求
         if (nbt == null) {
             if (EntityNbtCache.canRequest()) {
                 EntityNbtRequestC2SPacket.send(entityId);
                 EntityNbtCache.markRequested();
             }
-            // 缓存未就绪时显示提示
             float scale = 0.5f;
             int scaledScreenWidth = (int) (screenWidth / scale);
             drawContext.getMatrices().push();
@@ -117,17 +109,16 @@ public class EntityHealthHud {
         }
 
         float scale = 0.5f;
-        // 缩放后坐标需要反向放大，因为缩放会使整个坐标系缩小
         int scaledScreenWidth = (int) (screenWidth / scale);
         int scaledStartY = (int) (startY / scale);
-        int maxLineLength = 120; // 缩小后每行可以容纳更多字符
+        int maxLineLength = 120;
 
         drawContext.getMatrices().push();
         drawContext.getMatrices().scale(scale, scale, 1.0f);
 
         int yOffset = scaledStartY;
 
-        // 优先显示 ActiveEffects（紧跟在血量行下方）
+        // 优先显示 ActiveEffects
         if (nbt.contains("ActiveEffects")) {
             NbtElement effectElement = nbt.get("ActiveEffects");
             String effectText = "ActiveEffects: " + (effectElement != null ? effectElement.asString() : "[]");
@@ -148,7 +139,7 @@ public class EntityHealthHud {
 
         // 显示其他 NBT 数据
         for (String key : nbt.getKeys()) {
-            if (key.equals("ActiveEffects")) continue; // 已经显示过了
+            if (key.equals("ActiveEffects")) continue;
 
             NbtElement element = nbt.get(key);
             String nbtText = key + ": " + (element != null ? element.asString() : "null");
@@ -171,7 +162,7 @@ public class EntityHealthHud {
     }
 
     /**
-     * 通过射线追踪获取玩家准星所指的实体（包括非 LivingEntity）。
+     * 通过射线追踪获取玩家准星所指的实体。
      */
     private static Entity getTargetedEntity(MinecraftClient client) {
         if (client.cameraEntity == null) return null;
@@ -181,7 +172,6 @@ public class EntityHealthHud {
         Vec3d lookVec = client.cameraEntity.getRotationVec(1.0F);
         Vec3d reachEnd = cameraPos.add(lookVec.multiply(reach));
 
-        // 先检查方块碰撞距离，实体不应在方块后面被选中
         HitResult blockHit = client.cameraEntity.raycast(reach, 1.0F, false);
         double maxDist = reach;
         if (blockHit != null && blockHit.getType() != HitResult.Type.MISS) {
