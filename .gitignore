@@ -20,6 +20,12 @@ VIDEO_SCRIPT.md
 # Debug Menu (standalone project, tracked separately)
 debug-menu/
 
+# Build/run temp logs
+build_output.txt
+build_errors.txt
+run_output.txt
+run_errors.txt
+
 # Misc
 calc_anvil.ps1
 unnamed.png
